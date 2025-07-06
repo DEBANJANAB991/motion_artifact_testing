@@ -1,0 +1,232 @@
+### Starting TaskPrologue of job 1113460 on tg080 at Sat Jul  5 10:57:07 AM CEST 2025
+Running on cores 6-7,22-23,38-39,54-55 with governor powersave
+Sat Jul  5 10:57:07 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3080        On  |   00000000:3E:00.0 Off |                  N/A |
+| 30%   33C    P8             17W /  300W |      33MiB /  10240MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+🚀 Starting training…
+Epoch 1/100 — train: 0.011390, val: 0.010069 | PSNR: 20.24 dB, SSIM: 0.8308
+⇢ learning rate is now 1.000000e-03
+🔖 New best model saved (val 0.010069)
+Epoch 2/100 — train: 0.010122, val: 0.009978 | PSNR: 20.20 dB, SSIM: 0.8303
+⇢ learning rate is now 1.000000e-03
+🔖 New best model saved (val 0.009978)
+Epoch 3/100 — train: 0.010060, val: 0.010620 | PSNR: 20.07 dB, SSIM: 0.8275
+⇢ learning rate is now 1.000000e-03
+Epoch 4/100 — train: 0.009968, val: 0.011470 | PSNR: 19.76 dB, SSIM: 0.8247
+⇢ learning rate is now 1.000000e-03
+Epoch 5/100 — train: 0.009895, val: 0.010153 | PSNR: 20.18 dB, SSIM: 0.8307
+⇢ learning rate is now 1.000000e-03
+Epoch 6/100 — train: 0.009925, val: 0.010987 | PSNR: 19.73 dB, SSIM: 0.8283
+⇢ learning rate is now 1.000000e-03
+Epoch 7/100 — train: 0.009896, val: 0.009931 | PSNR: 20.26 dB, SSIM: 0.8307
+⇢ learning rate is now 1.000000e-03
+🔖 New best model saved (val 0.009931)
+Epoch 8/100 — train: 0.009800, val: 0.010283 | PSNR: 20.03 dB, SSIM: 0.8311
+⇢ learning rate is now 1.000000e-03
+Epoch 9/100 — train: 0.009816, val: 0.009852 | PSNR: 20.24 dB, SSIM: 0.8317
+⇢ learning rate is now 1.000000e-03
+🔖 New best model saved (val 0.009852)
+Epoch 10/100 — train: 0.009810, val: 0.012852 | PSNR: 19.23 dB, SSIM: 0.8265
+⇢ learning rate is now 1.000000e-03
+🔖 Saved checkpoint: /home/vault/iwi5/iwi5293h/models/epoch10.pth
+Epoch 11/100 — train: 0.009758, val: 0.009948 | PSNR: 20.25 dB, SSIM: 0.8306
+⇢ learning rate is now 1.000000e-03
+Epoch 12/100 — train: 0.009734, val: 0.009883 | PSNR: 20.29 dB, SSIM: 0.8313
+⇢ learning rate is now 1.000000e-03
+Epoch 13/100 — train: 0.009764, val: 0.009885 | PSNR: 20.23 dB, SSIM: 0.8322
+⇢ learning rate is now 1.000000e-03
+Epoch 14/100 — train: 0.009723, val: 0.010146 | PSNR: 20.15 dB, SSIM: 0.8297
+⇢ learning rate is now 1.000000e-03
+Epoch 15/100 — train: 0.009721, val: 0.009756 | PSNR: 20.33 dB, SSIM: 0.8297
+⇢ learning rate is now 1.000000e-03
+🔖 New best model saved (val 0.009756)
+Epoch 16/100 — train: 0.009726, val: 0.010381 | PSNR: 20.10 dB, SSIM: 0.8247
+⇢ learning rate is now 1.000000e-03
+Epoch 17/100 — train: 0.009673, val: 0.009801 | PSNR: 20.33 dB, SSIM: 0.8291
+⇢ learning rate is now 1.000000e-03
+Epoch 18/100 — train: 0.009709, val: 0.010026 | PSNR: 20.19 dB, SSIM: 0.8321
+⇢ learning rate is now 1.000000e-03
+Epoch 19/100 — train: 0.009670, val: 0.009760 | PSNR: 20.32 dB, SSIM: 0.8318
+⇢ learning rate is now 1.000000e-03
+Epoch 20/100 — train: 0.009664, val: 0.009857 | PSNR: 20.25 dB, SSIM: 0.8317
+⇢ learning rate is now 1.000000e-03
+🔖 Saved checkpoint: /home/vault/iwi5/iwi5293h/models/epoch20.pth
+Epoch 21/100 — train: 0.009732, val: 0.010014 | PSNR: 20.25 dB, SSIM: 0.8318
+⇢ learning rate is now 5.000000e-04
+Epoch 22/100 — train: 0.009550, val: 0.009771 | PSNR: 20.32 dB, SSIM: 0.8322
+⇢ learning rate is now 5.000000e-04
+Epoch 23/100 — train: 0.009564, val: 0.009753 | PSNR: 20.32 dB, SSIM: 0.8320
+⇢ learning rate is now 5.000000e-04
+🔖 New best model saved (val 0.009753)
+Epoch 24/100 — train: 0.009557, val: 0.010100 | PSNR: 20.11 dB, SSIM: 0.8316
+⇢ learning rate is now 5.000000e-04
+Epoch 25/100 — train: 0.009539, val: 0.009706 | PSNR: 20.37 dB, SSIM: 0.8317
+⇢ learning rate is now 5.000000e-04
+🔖 New best model saved (val 0.009706)
+Epoch 26/100 — train: 0.009565, val: 0.009952 | PSNR: 20.23 dB, SSIM: 0.8316
+⇢ learning rate is now 5.000000e-04
+Epoch 27/100 — train: 0.009547, val: 0.009861 | PSNR: 20.29 dB, SSIM: 0.8322
+⇢ learning rate is now 5.000000e-04
+Epoch 28/100 — train: 0.009553, val: 0.009711 | PSNR: 20.34 dB, SSIM: 0.8320
+⇢ learning rate is now 5.000000e-04
+Epoch 29/100 — train: 0.009536, val: 0.009670 | PSNR: 20.36 dB, SSIM: 0.8322
+⇢ learning rate is now 5.000000e-04
+🔖 New best model saved (val 0.009670)
+Epoch 30/100 — train: 0.009541, val: 0.012111 | PSNR: 19.40 dB, SSIM: 0.8141
+⇢ learning rate is now 5.000000e-04
+🔖 Saved checkpoint: /home/vault/iwi5/iwi5293h/models/epoch30.pth
+Epoch 31/100 — train: 0.009538, val: 0.009852 | PSNR: 20.33 dB, SSIM: 0.8321
+⇢ learning rate is now 5.000000e-04
+Epoch 32/100 — train: 0.009532, val: 0.009955 | PSNR: 20.30 dB, SSIM: 0.8319
+⇢ learning rate is now 5.000000e-04
+Epoch 33/100 — train: 0.009531, val: 0.009836 | PSNR: 20.26 dB, SSIM: 0.8320
+⇢ learning rate is now 5.000000e-04
+Epoch 34/100 — train: 0.009520, val: 0.009746 | PSNR: 20.35 dB, SSIM: 0.8287
+⇢ learning rate is now 5.000000e-04
+Epoch 35/100 — train: 0.009529, val: 0.009632 | PSNR: 20.38 dB, SSIM: 0.8321
+⇢ learning rate is now 5.000000e-04
+🔖 New best model saved (val 0.009632)
+Epoch 36/100 — train: 0.009535, val: 0.010281 | PSNR: 20.20 dB, SSIM: 0.8278
+⇢ learning rate is now 5.000000e-04
+Epoch 37/100 — train: 0.009540, val: 0.009709 | PSNR: 20.35 dB, SSIM: 0.8304
+⇢ learning rate is now 5.000000e-04
+Epoch 38/100 — train: 0.009539, val: 0.010063 | PSNR: 20.27 dB, SSIM: 0.8285
+⇢ learning rate is now 5.000000e-04
+Epoch 39/100 — train: 0.009545, val: 0.009776 | PSNR: 20.39 dB, SSIM: 0.8305
+⇢ learning rate is now 5.000000e-04
+Epoch 40/100 — train: 0.009520, val: 0.010122 | PSNR: 20.23 dB, SSIM: 0.8279
+⇢ learning rate is now 5.000000e-04
+🔖 Saved checkpoint: /home/vault/iwi5/iwi5293h/models/epoch40.pth
+Epoch 41/100 — train: 0.009513, val: 0.009855 | PSNR: 20.37 dB, SSIM: 0.8297
+⇢ learning rate is now 2.500000e-04
+Epoch 42/100 — train: 0.009459, val: 0.009778 | PSNR: 20.32 dB, SSIM: 0.8321
+⇢ learning rate is now 2.500000e-04
+Epoch 43/100 — train: 0.009454, val: 0.009621 | PSNR: 20.45 dB, SSIM: 0.8303
+⇢ learning rate is now 2.500000e-04
+🔖 New best model saved (val 0.009621)
+Epoch 44/100 — train: 0.009441, val: 0.009615 | PSNR: 20.45 dB, SSIM: 0.8310
+⇢ learning rate is now 2.500000e-04
+🔖 New best model saved (val 0.009615)
+Epoch 45/100 — train: 0.009435, val: 0.009557 | PSNR: 20.43 dB, SSIM: 0.8322
+⇢ learning rate is now 2.500000e-04
+🔖 New best model saved (val 0.009557)
+Epoch 46/100 — train: 0.009446, val: 0.009580 | PSNR: 20.46 dB, SSIM: 0.8315
+⇢ learning rate is now 2.500000e-04
+Epoch 47/100 — train: 0.009443, val: 0.009540 | PSNR: 20.46 dB, SSIM: 0.8311
+⇢ learning rate is now 2.500000e-04
+🔖 New best model saved (val 0.009540)
+Epoch 48/100 — train: 0.009424, val: 0.009620 | PSNR: 20.41 dB, SSIM: 0.8304
+⇢ learning rate is now 2.500000e-04
+Epoch 49/100 — train: 0.009441, val: 0.009741 | PSNR: 20.33 dB, SSIM: 0.8323
+⇢ learning rate is now 2.500000e-04
+Epoch 50/100 — train: 0.009439, val: 0.009575 | PSNR: 20.42 dB, SSIM: 0.8319
+⇢ learning rate is now 2.500000e-04
+🔖 Saved checkpoint: /home/vault/iwi5/iwi5293h/models/epoch50.pth
+Epoch 51/100 — train: 0.009424, val: 0.009766 | PSNR: 20.35 dB, SSIM: 0.8323
+⇢ learning rate is now 2.500000e-04
+Epoch 52/100 — train: 0.009435, val: 0.009775 | PSNR: 20.29 dB, SSIM: 0.8321
+⇢ learning rate is now 2.500000e-04
+Epoch 53/100 — train: 0.009446, val: 0.009598 | PSNR: 20.45 dB, SSIM: 0.8315
+⇢ learning rate is now 1.250000e-04
+Epoch 54/100 — train: 0.009382, val: 0.009567 | PSNR: 20.44 dB, SSIM: 0.8323
+⇢ learning rate is now 1.250000e-04
+Epoch 55/100 — train: 0.009372, val: 0.009534 | PSNR: 20.47 dB, SSIM: 0.8319
+⇢ learning rate is now 1.250000e-04
+🔖 New best model saved (val 0.009534)
+Epoch 56/100 — train: 0.009364, val: 0.009631 | PSNR: 20.45 dB, SSIM: 0.8308
+⇢ learning rate is now 1.250000e-04
+Epoch 57/100 — train: 0.009355, val: 0.009525 | PSNR: 20.46 dB, SSIM: 0.8319
+⇢ learning rate is now 1.250000e-04
+🔖 New best model saved (val 0.009525)
+Epoch 58/100 — train: 0.009356, val: 0.009593 | PSNR: 20.45 dB, SSIM: 0.8319
+⇢ learning rate is now 1.250000e-04
+Epoch 59/100 — train: 0.009358, val: 0.009563 | PSNR: 20.44 dB, SSIM: 0.8323
+⇢ learning rate is now 1.250000e-04
+Epoch 60/100 — train: 0.009364, val: 0.009528 | PSNR: 20.46 dB, SSIM: 0.8315
+⇢ learning rate is now 1.250000e-04
+🔖 Saved checkpoint: /home/vault/iwi5/iwi5293h/models/epoch60.pth
+Epoch 61/100 — train: 0.009356, val: 0.009513 | PSNR: 20.47 dB, SSIM: 0.8321
+⇢ learning rate is now 1.250000e-04
+🔖 New best model saved (val 0.009513)
+Epoch 62/100 — train: 0.009350, val: 0.009576 | PSNR: 20.45 dB, SSIM: 0.8319
+⇢ learning rate is now 1.250000e-04
+Epoch 63/100 — train: 0.009351, val: 0.009664 | PSNR: 20.43 dB, SSIM: 0.8302
+⇢ learning rate is now 1.250000e-04
+Epoch 64/100 — train: 0.009357, val: 0.009544 | PSNR: 20.44 dB, SSIM: 0.8322
+⇢ learning rate is now 1.250000e-04
+Epoch 65/100 — train: 0.009346, val: 0.009567 | PSNR: 20.47 dB, SSIM: 0.8314
+⇢ learning rate is now 1.250000e-04
+Epoch 66/100 — train: 0.009349, val: 0.009712 | PSNR: 20.34 dB, SSIM: 0.8324
+⇢ learning rate is now 1.250000e-04
+Epoch 67/100 — train: 0.009354, val: 0.010019 | PSNR: 20.28 dB, SSIM: 0.8278
+⇢ learning rate is now 6.250000e-05
+Epoch 68/100 — train: 0.009318, val: 0.009558 | PSNR: 20.48 dB, SSIM: 0.8315
+⇢ learning rate is now 6.250000e-05
+Epoch 69/100 — train: 0.009312, val: 0.009507 | PSNR: 20.47 dB, SSIM: 0.8319
+⇢ learning rate is now 6.250000e-05
+🔖 New best model saved (val 0.009507)
+Epoch 70/100 — train: 0.009306, val: 0.009544 | PSNR: 20.47 dB, SSIM: 0.8315
+⇢ learning rate is now 6.250000e-05
+🔖 Saved checkpoint: /home/vault/iwi5/iwi5293h/models/epoch70.pth
+Epoch 71/100 — train: 0.009308, val: 0.009571 | PSNR: 20.47 dB, SSIM: 0.8314
+⇢ learning rate is now 6.250000e-05
+Epoch 72/100 — train: 0.009308, val: 0.009520 | PSNR: 20.46 dB, SSIM: 0.8320
+⇢ learning rate is now 6.250000e-05
+Epoch 73/100 — train: 0.009310, val: 0.009509 | PSNR: 20.48 dB, SSIM: 0.8317
+⇢ learning rate is now 6.250000e-05
+Epoch 74/100 — train: 0.009294, val: 0.009539 | PSNR: 20.46 dB, SSIM: 0.8317
+⇢ learning rate is now 6.250000e-05
+Epoch 75/100 — train: 0.009298, val: 0.009552 | PSNR: 20.45 dB, SSIM: 0.8323
+⇢ learning rate is now 3.125000e-05
+Epoch 76/100 — train: 0.009287, val: 0.009509 | PSNR: 20.47 dB, SSIM: 0.8316
+⇢ learning rate is now 3.125000e-05
+Epoch 77/100 — train: 0.009285, val: 0.009533 | PSNR: 20.48 dB, SSIM: 0.8318
+⇢ learning rate is now 3.125000e-05
+Epoch 78/100 — train: 0.009270, val: 0.009517 | PSNR: 20.47 dB, SSIM: 0.8318
+⇢ learning rate is now 3.125000e-05
+Epoch 79/100 — train: 0.009269, val: 0.009536 | PSNR: 20.48 dB, SSIM: 0.8315
+⇢ learning rate is now 3.125000e-05
+✋ Early stopping at epoch 79 (no improvement in 10 epochs)
+Final Test Loss: 0.009562
+=== JOB_STATISTICS ===
+=== current date     : Sat Jul  5 03:37:33 PM CEST 2025
+= Job-ID             : 1113460 on tinygpu
+= Job-Name           : train_test_split
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : rtx3080
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 04:40:29
+= Total RAM usage    : 8.3 GiB of requested  GiB (%)   
+= Node list          : tg080
+= Subm/Elig/Start/End: 2025-07-05T10:56:37 / 2025-07-05T10:56:37 / 2025-07-05T10:57:04 / 2025-07-05T15:37:33
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/woody            27.8G  1000.0G  1500.0G        N/A      83K   5,000K   7,500K        N/A    
+    /home/vault           313.0G  1048.6G  2097.2G        N/A     165K     200K     400K        N/A    
+    /home/hpc              17.0G   104.9G   209.7G        N/A  15,886      500K   1,000K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+NVIDIA GeForce RTX 3080, 00000000:3E:00.0, 2175656, 99 %, 12 %, 1590 MiB, 16821832 ms

@@ -1,0 +1,21 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "/home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/train_test_split.py", line 156, in <module>
+    main()
+  File "/home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/train_test_split.py", line 121, in main
+    pred = model(art)
+  File "/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/model_mr_lkv.py", line 128, in forward
+    return self.head(x)
+  File "/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 460, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 456, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Given groups=1, weight of size [1, 256, 1, 1], expected input[16, 128, 22, 32] to have 256 channels, but got 128 channels instead

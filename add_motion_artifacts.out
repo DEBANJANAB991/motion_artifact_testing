@@ -1,0 +1,47 @@
+### Starting TaskPrologue of job 1112428 on tg082 at Thu Jul  3 08:39:20 AM CEST 2025
+Running on cores 6-7,22-23,38-39,54-55 with governor powersave
+Thu Jul  3 08:39:20 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3080        On  |   00000000:3E:00.0 Off |                  N/A |
+| 30%   33C    P8             18W /  300W |       1MiB /  10240MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+✅ All sinograms artifacted under /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/sinograms_artifact
+=== JOB_STATISTICS ===
+=== current date     : Thu Jul  3 08:39:50 AM CEST 2025
+= Job-ID             : 1112428 on tinygpu
+= Job-Name           : add_motion_artifacts
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : rtx3080
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 00:00:31
+= Total RAM usage    : 0.6 GiB of requested  GiB (%)   
+= Node list          : tg082
+= Subm/Elig/Start/End: 2025-07-03T08:39:19 / 2025-07-03T08:39:19 / 2025-07-03T08:39:19 / 2025-07-03T08:39:50
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+!!! /home/vault           523.5G  1048.6G  2097.2G    310413*     310K     200K     400K  -29434days !!!
+    /home/hpc              16.9G   104.9G   209.7G        N/A  15,766      500K   1,000K        N/A    
+    /home/woody            20.4G  1000.0G  1500.0G        N/A      69K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
