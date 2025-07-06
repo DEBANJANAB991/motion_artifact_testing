@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
-Batch-convert up to MAX_SAMPLES DICOM slices → fan-beam sinograms (NumPy .npy).
-
-Stops after writing MAX_SAMPLES outputs, for quick partial runs.
+Converts files from volume domain to projection domain
 """
 
 import os, sys
@@ -27,7 +25,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from diffct.differentiable import FanProjectorFunction
 
-MAX_SAMPLES = 10000  # change this to any number of sinograms you want
+MAX_SAMPLES = 10000  
 
 
 def dicom_to_hu(path: Path) -> np.ndarray:
@@ -94,7 +92,7 @@ def main() -> None:
             np.save(dst, sino)
             processed += 1
 
-        # next folder
+      
 
     print(f"✅ Finished: wrote {processed} sinograms (limit {MAX_SAMPLES}) to {SINOGRAM_ROOT}")
 
