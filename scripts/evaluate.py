@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from pathlib import Path
 
-# --- import your dataset, model, and metric helpers ---
+
 from train_test_split import (
     SinogramDataset,
     MR_LKV,
@@ -14,12 +14,12 @@ from train_test_split import (
     CKPT_DIR,
     BATCH_SIZE,
 )
-from train_test_split import psnr, ssim  # assuming you defined these there
+from train_test_split import psnr, ssim 
 
 def evaluate():
     print("Starting evaluation…", flush=True)
 
-    # Rebuild splits exactly as in training
+   
     dataset = SinogramDataset(Path(CLEAN_SINOGRAM_ROOT),
                               Path(ARTIFACT_ROOT))
     total   = len(dataset)
@@ -38,7 +38,7 @@ def evaluate():
                              num_workers=0,
                              pin_memory=True)
 
-    # Load the best model
+    # Loads the best model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = MR_LKV().to(device)
     model.load_state_dict(torch.load(Path(CKPT_DIR) / "best_model.pth",
