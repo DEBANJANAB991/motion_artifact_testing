@@ -22,8 +22,7 @@ class RLKB(nn.Module):
 
 class FourierUnit(nn.Module):
     """
-    Applies 2D FFT-based global mixing:
-      - forward: FFT, channel-wise mixing, inverse FFT
+    FFT, channel-wise mixing, inverse FFT
     """
     def __init__(self, C):
         super().__init__()
@@ -31,7 +30,7 @@ class FourierUnit(nn.Module):
         self.mix_imag = nn.Conv2d(C, C, 1)
 
     def forward(self, x):
-        # x: [B, C, H, W]
+      
         fft = torch.fft.fftn(x, dim=(-2, -1), norm='ortho')  # complex tensor
         real = fft.real
         imag = fft.imag
