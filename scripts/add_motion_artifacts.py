@@ -6,7 +6,7 @@ from pathlib import Path
 from tqdm import tqdm
 from config import SINOGRAM_ROOT, ARTIFACT_ROOT, N_VIEWS, DET_SPACING
 
-# Spline-based motion model (Thies et al. 2021)
+# Spline-based motion model 
 from scipy.interpolate import CubicSpline
 
 def apply_motion(sino_np: np.ndarray,
@@ -14,13 +14,13 @@ def apply_motion(sino_np: np.ndarray,
                  det_spacing: float = DET_SPACING,
                  n_nodes: int = 10,
                  max_trans: float = 10.0) -> np.ndarray:
-    # control-point indices
+  
     t_nodes = np.linspace(0, n_views, n_nodes, endpoint=False)
 
     # random translations at control-points
     tx = np.random.uniform(-max_trans, max_trans, n_nodes)
     ty = np.random.uniform(-max_trans, max_trans, n_nodes)
-    # enforce periodic endpoints
+  
     tx[-1] = tx[0]
     ty[-1] = ty[0]
 
