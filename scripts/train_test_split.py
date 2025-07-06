@@ -8,9 +8,11 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, random_split, Dataset
 import numpy as np
 import torch.nn.functional as F
-# network definition
+
+
 from model_mr_lkv import MR_LKV
-# user config
+
+
 from config import (
     CLEAN_SINOGRAM_ROOT,
     ARTIFACT_ROOT,
@@ -25,12 +27,12 @@ torch.manual_seed(42)
 
 
 
-# ---- PSNR (same as before) ----
+# PSNR 
 def psnr(pred, target, max_val=1.0):
     mse = F.mse_loss(pred, target, reduction='mean')
     return 10 * torch.log10(max_val**2 / mse)
 
-# ---- Simple SSIM implementation ----
+# SSIM implementation 
 def gaussian(window_size: int, sigma: float):
     coords = torch.arange(window_size, dtype=torch.float32) - window_size//2
     g = torch.exp(-(coords**2) / (2*sigma**2))
@@ -62,14 +64,14 @@ def ssim(pred: torch.Tensor, target: torch.Tensor,
                ((mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2))
     return ssim_map.mean()
 
-# --- Split fractions: 80% train, 10% val, 10% test ---
+# Split fractions: 80% train, 10% val, 10% test 
 TRAIN_FRAC = 0.8
 VAL_FRAC   = 0.1
 TEST_FRAC  = 1.0 - TRAIN_FRAC - VAL_FRAC  # = 0.1
 
 
 class SinogramDataset(Dataset):
-    # (unchanged from your original)
+  
     def __init__(self, clean_root: Path, art_root: Path):
         self.clean_root = Path(clean_root)
         self.art_root   = Path(art_root)
@@ -118,11 +120,11 @@ def parse_args():
 
 
 def main():
-    print("🚀 Starting training…", flush=True)
+    print(" Starting training…", flush=True)
     args = parse_args()
     args.ckpt_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1) prepare dataset and splits
+# 1) dataset preparation and splits
     dataset = SinogramDataset(args.clean_root, args.art_root)
     total   = len(dataset)
     n_train = int(TRAIN_FRAC * total)
@@ -134,8 +136,7 @@ def main():
         generator=torch.Generator().manual_seed(42)
     )
 
-   # train_loader = DataLoader(train_ds, batch_size=args.batch_size,
-    #                          shuffle=True,  num_workers=4, pin_memory=True)
+  
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, generator=torch.Generator().manual_seed(42), num_workers=4, pin_memory=True)
     val_loader   = DataLoader(val_ds,   batch_size=args.batch_size,
                               shuffle=False, num_workers=2, pin_memory=True)
@@ -207,7 +208,7 @@ def main():
         val_ssim = running_ssim / n_val
         print(f"Epoch {epoch}/{args.epochs} — "       f"train: {train_loss:.6f}, val: {val_loss:.6f} | "       f"PSNR: {val_psnr:.2f} dB, SSIM: {val_ssim:.4f}",       flush=True)
 
-        # step the LR scheduler on validation loss
+        # LR scheduler on validation loss
         scheduler.step(val_loss)
         # --- manual LR logging ---
         current_lr = scheduler.get_last_lr()[0]
