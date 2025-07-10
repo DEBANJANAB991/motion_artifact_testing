@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/plot.py", line 133, in <module>
+    rel = sorted(Path(CLEAN_SINOGRAM_ROOT).rglob("*.npy"))[i-1].relative_to(CLEAN_SINOGRAM_ROOT)
+IndexError: list index out of range

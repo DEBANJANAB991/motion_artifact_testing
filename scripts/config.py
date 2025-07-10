@@ -8,10 +8,10 @@ from pathlib import Path
 DATASET_PATH   = Path("/home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw")
 
 
-SINOGRAM_ROOT = DATASET_PATH.parent / "sinograms"
-ARTIFACT_ROOT1  = Path("/home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/sinograms_artifact") #name to be changed back to ARTIFACT_ROOT 
-CLEAN_SINOGRAM_ROOT=Path("/home/woody/iwi5/iwi5293h/clean_sinograms")
-ARTIFACT_ROOT=Path("/home/woody/iwi5/iwi5293h/art_sinograms")
+CLEAN_SINOGRAM_ROOT = DATASET_PATH.parent / "sinograms"
+ARTIFACT_ROOT = Path("/home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/art_sinograms") #name to be changed back to ARTIFACT_ROOT 
+#CLEAN_SINOGRAM_ROOT=Path("/home/woody/iwi5/iwi5293h/clean_sinograms")
+#ARTIFACT_ROOT=Path("/home/woody/iwi5/iwi5293h/art_sinograms")
 
  
 
