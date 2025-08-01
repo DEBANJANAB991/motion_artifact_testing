@@ -5,13 +5,13 @@
 # ===============================
 # SLURM Directives
 # ===============================
-#SBATCH --gres=gpu:rtx3080:1               # Request 1 NVIDIA rtx3080 GPU
-#SBATCH --partition=rtx3080               # Specify the GPU partition rtx3080
+#SBATCH --gres=gpu:a100:1               # Request 1 NVIDIA rtx3080 GPU
+#SBATCH --partition=a100               # Specify the GPU partition rtx3080
 #SBATCH --time=24:00:00                 # Maximum runtime of 24 hours
 #SBATCH --export=NONE                   # Do not export current environment variables
-#SBATCH --job-name=evaluate         # Job name
-#SBATCH --output=evaluate.out      # Standard output log file (%j expands to job ID)
-#SBATCH --error=evaluate.err       # Standard error log file (%j expands to job ID)
+#SBATCH --job-name=REPLKNET        # Job name
+#SBATCH --output=REPLKNET.out      # Standard output log file (%j expands to job ID)
+#SBATCH --error=REPLKNET.err       # Standard error log file (%j expands to job ID)
  
 # ===============================
 # Environment Configuration
@@ -46,6 +46,10 @@ cd /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts  # Replace with your 
 # ===============================
  
 # Run the Optuna-based FixMatch HPO Python script with necessary arguments
-python3 -u evaluate.py
+#python3 -u train_test_split.py --model unet
+#python3 train_test_split.py --model mr_lkv --base-ch 32 --norm batch
+python train_test_split.py --model replk
+
+
 
 
