@@ -19,5 +19,9 @@ All the codes are present inside the scripts folder:
 -> evaluate.py (For testing data and computing metrics).
 -> config.py
 
+# Comparison plot among MR_LKV, REPLKNET AND UNET:
 
+
+
+<img width="640" height="480" alt="model_comparison_ssim" src="https://github.com/user-attachments/assets/4c7d6ecd-a8a3-4c1a-820c-5a051551fee7" />
 
