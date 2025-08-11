@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 from config import (
     DATASET_PATH,
-    SINOGRAM_ROOT,
+    CLEAN_SINOGRAM_ROOT,
     N_VIEWS,
     N_DET,
     DET_SPACING,
@@ -71,7 +71,7 @@ def main() -> None:
         if not dcm_files:
             continue
 
-        out_dir = SINOGRAM_ROOT / Path(root).relative_to(DATASET_PATH)
+        out_dir = CLEAN_SINOGRAM_ROOT / Path(root).relative_to(DATASET_PATH)
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # Process each slice, but stop at MAX_SAMPLES
@@ -94,7 +94,7 @@ def main() -> None:
 
       
 
-    print(f"✅ Finished: wrote {processed} sinograms (limit {MAX_SAMPLES}) to {SINOGRAM_ROOT}")
+    print(f"✅ Finished: wrote {processed} sinograms (limit {MAX_SAMPLES}) to {CLEAN_SINOGRAM_ROOT}")
 
 
 if __name__ == "__main__":

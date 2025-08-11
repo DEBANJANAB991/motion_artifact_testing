@@ -10,10 +10,30 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, random_split, Dataset
 
 import numpy as np
+# Allow importing SwinIR directly from local clone
+repo_root = Path(__file__).resolve().parent.parent
+# insert the SwinIR repo root so we can import its modules
+sys.path.insert(0, str(repo_root ))
+# Allow importing Restormer (it contains a local 'basicsr' package)
+sys.path.insert(0, str(repo_root / "Restormer"))
+
+import importlib
+print("TRY:", repo_root)
+print("SwinIR:", importlib.util.find_spec("SwinIR") is not None)
+print("basicsr:", importlib.util.find_spec("basicsr") is not None)
 
 from MR_LKV_refactorv2 import MR_LKV      # MR-LKV implementation
 from UNet import UNet                     # U-Net baseline
 from replknet import RepLKNet             # Original RepLKNet backbone
+from SwinIR.models.network_swinir import SwinIR
+# Restormer import (repo: swz30/Restormer)
+try:
+    from basicsr.models.archs.restormer_arch import Restormer as RestormerNet
+except ModuleNotFoundError:
+    # fallback if your clone layout is different (rare)
+    archs_dir = repo_root / "Restormer" / "basicsr" / "models" / "archs"
+    sys.path.insert(0, str(archs_dir))
+    from restormer_arch import Restormer as RestormerNet
 
 from config import (
     CLEAN_SINOGRAM_ROOT,
@@ -67,11 +87,12 @@ VAL_FRAC   = 0.1
 TEST_FRAC  = 1.0 - TRAIN_FRAC - VAL_FRAC
 
 class SinogramDataset(Dataset):
-    def __init__(self, clean_root: Path, art_root: Path):
+    def __init__(self, clean_root: Path, art_root: Path, patch: int = 256):
         self.clean_root = Path(clean_root)
         self.art_root   = Path(art_root)
         self.clean_paths = sorted(self.clean_root.rglob("*.npy"))
         self.art_paths = [self.art_root / p.relative_to(self.clean_root) for p in self.clean_paths]
+        self.patch =int(patch) 
         if not all(p.exists() for p in self.art_paths):
             art_map = {p.name: p for p in self.art_root.rglob("*.npy")}
             self.art_paths = [art_map.get(p.name) for p in self.clean_paths]
@@ -84,13 +105,25 @@ class SinogramDataset(Dataset):
     def __len__(self):
         return len(self.clean_paths)
 
+
     def __getitem__(self, idx):
         clean_arr = np.load(self.clean_paths[idx]).astype(np.float32)
         art_arr   = np.load(self.art_paths[idx]).astype(np.float32)
+        # scale each example to [0,1]
         clean_arr = (clean_arr - clean_arr.min()) / (clean_arr.max() - clean_arr.min() + 1e-8)
         art_arr   = (art_arr   - art_arr.min())   / (art_arr.max()   - art_arr.min()   + 1e-8)
-        clean = torch.from_numpy(clean_arr)[None]
-        art   = torch.from_numpy(art_arr)[None]
+        # now randomly crop to 256×256
+        H, W = clean_arr.shape
+       # th, tw = 256, 256
+        th= tw = int(self.patch)
+        i = np.random.randint(0, H - th + 1)
+        j = np.random.randint(0, W - tw + 1)
+        clean_crop = clean_arr[i:i+th, j:j+tw]
+        art_crop   = art_arr  [i:i+th, j:j+tw]
+        # 4) to torch tensors, add channel dim
+        clean = torch.from_numpy(clean_crop)[None]
+        art   = torch.from_numpy(art_crop  )[None]
+
         return art, clean
 
 # ---------------- RepLKNet Regression Wrapper ---------------- #
@@ -143,11 +176,62 @@ class RepLKNetReg(nn.Module):
         out = self.decoder(feats)
         return F.interpolate(out, size=(H, W), mode='bilinear', align_corners=False)
 
+
+class SwinIRWrapper(nn.Module):
+    def __init__(self, img_size=512, window_size=8, in_chans=1, out_chans=1,*, use_checkpoint: bool = False, **kwargs):
+        super().__init__()
+        self.net = SwinIR(
+            img_size=img_size,
+            window_size=window_size,
+            in_chans=in_chans,
+            out_chans=out_chans,
+            img_range=1.0,
+            upsampler='none',
+            use_checkpoint=use_checkpoint,
+            **kwargs
+        )
+    def forward(self, x):
+        return self.net(x)
+
+class RestormerWrapper(nn.Module):
+    """
+    Thin wrapper around swz30/Restormer for 1→1 denoising/artifact removal.
+    Uses a lighter config so it fits easily on 10GB GPUs. Tweak if you want.
+    """
+    def __init__(self,
+                 inp_channels=1,
+                 out_channels=1,
+                 dim=48,
+                 num_blocks=[2, 2, 2, 2],            # lighter than default [4,6,6,8]
+                 num_refinement_blocks=2,            # lighter than default 4
+                 heads=[1, 2, 4, 8],
+                 ffn_expansion_factor=2.66,
+                 bias=False,
+                 LayerNorm_type='WithBias',
+                 dual_pixel_task=False):
+        super().__init__()
+        self.net = RestormerNet(
+            inp_channels=inp_channels,
+            out_channels=out_channels,
+            dim=dim,
+            num_blocks=num_blocks,
+            num_refinement_blocks=num_refinement_blocks,
+            heads=heads,
+            ffn_expansion_factor=ffn_expansion_factor,
+            bias=bias,
+            LayerNorm_type=LayerNorm_type,
+            dual_pixel_task=dual_pixel_task
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
 # ---------------- Args ---------------- #
 
 def parse_args():
     p = argparse.ArgumentParser(description="Train artifact-reduction models")
-    p.add_argument("--model", choices=["mr_lkv", "unet", "replk"], default="mr_lkv",
+    p.add_argument("--model", choices=["mr_lkv", "unet", "replk","swinir","restormer"], default="mr_lkv",
                    help="Which architecture to train")
     p.add_argument("--clean-root",   type=Path, default=Path(CLEAN_SINOGRAM_ROOT))
     p.add_argument("--art-root",     type=Path, default=Path(ARTIFACT_ROOT))
@@ -166,21 +250,29 @@ def parse_args():
                    help="Number of blocks per RepLKNet stage")
     p.add_argument("--replk-channels",  nargs=4, type=int, default=[64,128,256,512],
                    help="Channel dims per RepLKNet stage")
-    p.add_argument("--replk-small",     type=int, default=5,
+    p.add_argument("--replk-small",     type=int, default=5,    
                    help="Small-kernel size for reparam conv")
     p.add_argument("--replk-drop-path", type=float, default=0.0,
                    help="Drop path rate for RepLKNet")
+    p.add_argument("--patch", type=int, default=96, help="random crop size")
     return p.parse_args()
+
+
+
 
 # ---------------- Train & Eval ---------------- #
 
 def main():
     args = parse_args()
     print(f"Starting training with model={args.model}…", flush=True)
+    # create a subdirectory for this model inside the checkpoint directory
+    args.ckpt_dir = args.ckpt_dir / args.model
     args.ckpt_dir.mkdir(parents=True, exist_ok=True)
+    print(f"→ Checkpoints will be saved to: {args.ckpt_dir}")
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # prepare data splits
-    dataset = SinogramDataset(args.clean_root, args.art_root)
+    dataset = SinogramDataset(args.clean_root, args.art_root , patch=args.patch)
     total   = len(dataset)
     n_train = int(TRAIN_FRAC * total)
     n_val   = int(VAL_FRAC   * total)
@@ -213,17 +305,25 @@ def main():
             use_decoder=(not args.no_decoder),
             final_activation=None
         ).to(device)
-    else:  # replk
-        model = RepLKNetReg(
-            large_kernel_sizes=args.replk_kernels,
-            layers=args.replk_layers,
-            channels=args.replk_channels,
-            drop_path_rate=args.replk_drop_path,
-            small_kernel=args.replk_small,
-            in_ch=1,
-            use_checkpoint=False,
-            small_kernel_merged=False
+    elif args.model == "replk":
+        model = RepLKNetReg(large_kernel_sizes=args.replk_kernels, layers=args.replk_layers, channels=args.replk_channels, drop_path_rate=args.replk_drop_path, small_kernel=args.replk_small, in_ch=1).to(device)
+    elif args.model == "swinir":
+        model = SwinIRWrapper(img_size=512, window_size=8, in_chans=1, out_chans=1, depths=[4,4,4,4], embed_dim=64, num_heads=[2,2,2,2], mlp_ratio=2,use_checkpoint=True).to(device)
+    elif args.model == "restormer":
+        model = RestormerWrapper(
+            inp_channels=1,
+            out_channels=1,
+            dim=48,
+            num_blocks=[2,2,2,4],          # start small; you can scale up later
+            num_refinement_blocks=2,
+            heads=[1,2,2,4],
+            ffn_expansion_factor=2.0,
+            bias=False,
+            LayerNorm_type='WithBias'
         ).to(device)
+
+    else:
+        raise ValueError(f"Unknown model {args.model}")
 
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Model parameters: {total_params:,}")

@@ -8,16 +8,18 @@ from pathlib import Path
 DATASET_PATH   = Path("/home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw")
 
 
-CLEAN_SINOGRAM_ROOT = DATASET_PATH.parent / "sinograms"
-ARTIFACT_ROOT = Path("/home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/art_sinograms") #name to be changed back to ARTIFACT_ROOT 
-#CLEAN_SINOGRAM_ROOT=Path("/home/woody/iwi5/iwi5293h/clean_sinograms")
-#ARTIFACT_ROOT=Path("/home/woody/iwi5/iwi5293h/art_sinograms")
+#CLEAN_SINOGRAM_ROOT = DATASET_PATH.parent / "sinograms"
+#ARTIFACT_ROOT = Path("/home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/art_sinograms") #name to be changed back to ARTIFACT_ROOT 
+CLEAN_SINOGRAM_ROOT=Path("/home/woody/iwi5/iwi5293h/clean_sinograms")
+ARTIFACT_ROOT=Path("/home/woody/iwi5/iwi5293h/art_sinograms")
+
 
  
 
 # Where to save model checkpoints (scratch)
-#CKPT_DIR = Path("/home/woody/iwi5/iwi5293h/models")
+
 CKPT_DIR=Path("/home/vault/iwi5/iwi5293h/models")
+
 
 RECON_ROOT     = DATASET_PATH.parent / "recon"    
 

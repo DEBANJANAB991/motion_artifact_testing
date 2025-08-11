@@ -26,13 +26,14 @@ def apply_motion(sino_np: np.ndarray,
     # random translations at control-points
     tx = np.random.uniform(-max_trans, max_trans, n_nodes)
     ty = np.random.uniform(-max_trans, max_trans, n_nodes)
+    rot_nodes = np.random.uniform(-1.0, 1.0, n_nodes)
     # enforce periodic endpoints
     tx[-1] = tx[0]
     ty[-1] = ty[0]
-
+    rot_nodes[-1] = rot_nodes[0]
     # create periodic splines
-    cs_tx  = CubicSpline(t_nodes, tx_nodes,  bc_type='periodic')
-    cs_ty  = CubicSpline(t_nodes, ty_nodes,  bc_type='periodic')
+    cs_tx  = CubicSpline(t_nodes, tx, bc_type='periodic')
+    cs_ty  = CubicSpline(t_nodes, ty, bc_type='periodic')
     cs_rot = CubicSpline(t_nodes, rot_nodes, bc_type='periodic')
 
     # 2) evaluate per-angle offsets
