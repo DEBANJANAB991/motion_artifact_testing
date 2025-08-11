@@ -1,2 +1,1 @@
-/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/timm/models/layers/__init__.py:48: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
-  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+slurmstepd: error: *** JOB 1136221 ON tg085 CANCELLED AT 2025-08-02T10:35:07 ***
