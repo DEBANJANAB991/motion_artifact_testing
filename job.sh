@@ -5,13 +5,13 @@
 # ===============================
 # SLURM Directives
 # ===============================
-#SBATCH --gres=gpu:a100:1               # Request 1 NVIDIA rtx3080 GPU
-#SBATCH --partition=a100               # Specify the GPU partition rtx3080
+#SBATCH --gres=gpu:v100:1               # Request 1 NVIDIA rtx3080 GPU
+#SBATCH --partition=v100               # Specify the GPU partition rtx3080
 #SBATCH --time=24:00:00                 # Maximum runtime of 24 hours
 #SBATCH --export=NONE                   # Do not export current environment variables
-#SBATCH --job-name=REPLKNET        # Job name
-#SBATCH --output=REPLKNET.out      # Standard output log file (%j expands to job ID)
-#SBATCH --error=REPLKNET.err       # Standard error log file (%j expands to job ID)
+#SBATCH --job-name=mprnet        # Job name
+#SBATCH --output=mprnet.out      # Standard output log file (%j expands to job ID)
+#SBATCH --error=mprnet.err       # Standard error log file (%j expands to job ID)
  
 # ===============================
 # Environment Configuration
@@ -48,8 +48,19 @@ cd /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts  # Replace with your 
 # Run the Optuna-based FixMatch HPO Python script with necessary arguments
 #python3 -u train_test_split.py --model unet
 #python3 train_test_split.py --model mr_lkv --base-ch 32 --norm batch
-python train_test_split.py --model replk
+  
 
+#python3 train_test_split.py \
+ # --model swinir \
+#python3 train_test_split.py --model restormer --batch-size 2 --patch 96
+python3 train_test_split.py --model mprnet --patch 96 --batch-size 4 --epochs 50
+
+
+
+#python3 train_test_split.py --model replk
+#python3 compute_flops.py
+#python3 add_motion_artifacts.py
+#python3 dicom_to_sinogram.py
 
 
 
