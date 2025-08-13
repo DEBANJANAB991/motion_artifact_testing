@@ -1,0 +1,49 @@
+### Starting TaskPrologue of job 1185194 on tg082 at Wed Aug 13 02:58:01 PM CEST 2025
+Running on cores 2-3,18-19,34-35,50-51 with governor powersave
+Wed Aug 13 14:58:01 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3080        On  |   00000000:1B:00.0 Off |                  N/A |
+| 30%   35C    P8             14W /  300W |       1MiB /  10240MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+[info] Searching logs in: /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/logs
+[warn] No files found.
+[done] Wrote 0 rows to results/tables/metrics_from_logs.csv
+=== JOB_STATISTICS ===
+=== current date     : Wed Aug 13 02:58:07 PM CEST 2025
+= Job-ID             : 1185194 on tinygpu
+= Job-Name           : comparison
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : rtx3080
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 00:00:11
+= Total RAM usage    : 0.1 GiB of requested  GiB (%)   
+= Node list          : tg082
+= Subm/Elig/Start/End: 2025-08-13T14:57:26 / 2025-08-13T14:57:26 / 2025-08-13T14:57:56 / 2025-08-13T14:58:07
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/woody            29.1G  1000.0G  1500.0G        N/A     110K   5,000K   7,500K        N/A    
+    /home/hpc              17.5G   104.9G   209.7G        N/A  17,342      500K   1,000K        N/A    
+    /home/vault           363.6G  1048.6G  2097.2G        N/A     196K     200K     400K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]

@@ -1,0 +1,79 @@
+### Starting TaskPrologue of job 1178369 on tg072 at Mon Aug 11 04:36:30 PM CEST 2025
+Running on cores 0-1,8-9,16-17,24-25 with governor ondemand
+Mon Aug 11 16:36:30 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.133.20             Driver Version: 570.133.20     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:18:00.0 Off |                    0 |
+| N/A   33C    P0             27W /  250W |       0MiB /  32768MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+TRY: /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+SwinIR: True
+basicsr: True
+Starting training with model=restormer…
+→ Checkpoints will be saved to: /home/vault/iwi5/iwi5293h/models/restormer
+Model parameters: 12,163,286
+Epoch 1/100 — train: 28497.574987, val: 0.274092 | PSNR: 5.72 dB, SSIM: 0.0495
+⇢ learning rate is now 1.00e-03
+Epoch 2/100 — train: 0.102610, val: 0.046653 | PSNR: 13.39 dB, SSIM: 0.1683
+⇢ learning rate is now 1.00e-03
+Epoch 3/100 — train: 103437450969.960556, val: 6770418.219000 | PSNR: -68.14 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 4/100 — train: 3387549.670422, val: 1244115.380250 | PSNR: -60.85 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 5/100 — train: 1329446934901.549805, val: 41659803.420000 | PSNR: -76.08 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 6/100 — train: 28890412.112625, val: 37025037.228000 | PSNR: -75.65 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 7/100 — train: 5498696.483422, val: 2599490.655000 | PSNR: -64.11 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 8/100 — train: 10208442558561.904297, val: 199809836.928000 | PSNR: -82.95 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Epoch 9/100 — train: 95723695.632000, val: 39137160.124000 | PSNR: -75.89 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Epoch 10/100 — train: 23652486.524250, val: 12522429.642000 | PSNR: -70.91 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Epoch 11/100 — train: 1240734590389.580078, val: 245242661.984000 | PSNR: -83.83 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Epoch 12/100 — train: 75106454.232750, val: 23842702.432000 | PSNR: -73.61 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+✋ Early stopping at epoch 12
+Final Test — Loss: 23752280.972000, PSNR: -73.66 dB, SSIM: 0.0000
+=== JOB_STATISTICS ===
+=== current date     : Mon Aug 11 05:39:02 PM CEST 2025
+= Job-ID             : 1178369 on tinygpu
+= Job-Name           : restormer
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : v100
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 01:02:33
+= Total RAM usage    : 14.9 GiB of requested  GiB (%)   
+= Node list          : tg072
+= Subm/Elig/Start/End: 2025-08-11T16:35:45 / 2025-08-11T16:35:45 / 2025-08-11T16:35:46 / 2025-08-11T17:38:19
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc              17.0G   104.9G   209.7G        N/A  15,110      500K   1,000K        N/A    
+    /home/woody            29.1G  1000.0G  1500.0G        N/A     110K   5,000K   7,500K        N/A    
+    /home/vault           360.9G  1048.6G  2097.2G        N/A     196K     200K     400K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:18:00.0, 1191997, 82 %, 27 %, 2418 MiB, 3739457 ms
