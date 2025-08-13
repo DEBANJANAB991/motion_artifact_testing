@@ -7,7 +7,7 @@ UNet.py — Standard 2D U-Net with:
   • Safe skip concatenation via center-crop (handles odd sizes)
   • Optional final activation (e.g. sigmoid)
 
-Author: <your name>
+
 """
 from typing import Optional, Literal, Tuple
 
