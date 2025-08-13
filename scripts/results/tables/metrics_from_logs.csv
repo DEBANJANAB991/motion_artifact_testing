@@ -1,0 +1,6 @@
+model,final_test_loss,final_test_psnr,final_test_ssim,params,log_file
+MR_LKV,0.00391,24.48,0.9284,3650879,results/logs/MR_LKVV2.out
+RepLKNet,0.021398,16.75,0.6834,21792833,results/logs/REPLKNET.out
+SwinIR,0.004795,23.28,0.9294,728865,results/logs/SWINIR.out
+UNet,0.002072,27.41,0.9571,31042369,results/logs/Unet_model.out
+Restormer,23752280.972,,0.0,12163286,results/logs/restormer.out
