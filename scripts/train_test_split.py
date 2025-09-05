@@ -10,11 +10,12 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, random_split, Dataset
 
 import numpy as np
-# Allow importing SwinIR directly from local clone
+
+
 repo_root = Path(__file__).resolve().parent.parent
-# insert the SwinIR repo root so we can import its modules
-sys.path.insert(0, str(repo_root ))
-# Allow importing Restormer (it contains a local 'basicsr' package)
+
+sys.path.insert(0, str(repo_root))
+
 sys.path.insert(0, str(repo_root / "Restormer"))
 
 import importlib
@@ -30,7 +31,7 @@ from SwinIR.models.network_swinir import SwinIR
 try:
     from basicsr.models.archs.restormer_arch import Restormer as RestormerNet
 except ModuleNotFoundError:
-    # fallback if your clone layout is different (rare)
+   
     archs_dir = repo_root / "Restormer" / "basicsr" / "models" / "archs"
     sys.path.insert(0, str(archs_dir))
     from restormer_arch import Restormer as RestormerNet
@@ -92,7 +93,7 @@ class SinogramDataset(Dataset):
         self.art_root   = Path(art_root)
         self.clean_paths = sorted(self.clean_root.rglob("*.npy"))
         self.art_paths = [self.art_root / p.relative_to(self.clean_root) for p in self.clean_paths]
-        self.patch =int(patch) 
+        self.patch = int(patch)
         if not all(p.exists() for p in self.art_paths):
             art_map = {p.name: p for p in self.art_root.rglob("*.npy")}
             self.art_paths = [art_map.get(p.name) for p in self.clean_paths]
@@ -105,25 +106,22 @@ class SinogramDataset(Dataset):
     def __len__(self):
         return len(self.clean_paths)
 
-
     def __getitem__(self, idx):
         clean_arr = np.load(self.clean_paths[idx]).astype(np.float32)
         art_arr   = np.load(self.art_paths[idx]).astype(np.float32)
-        # scale each example to [0,1]
+        # normalization
         clean_arr = (clean_arr - clean_arr.min()) / (clean_arr.max() - clean_arr.min() + 1e-8)
         art_arr   = (art_arr   - art_arr.min())   / (art_arr.max()   - art_arr.min()   + 1e-8)
-        # now randomly crop to 256×256
+        # random crop to patch×patch
         H, W = clean_arr.shape
-       # th, tw = 256, 256
-        th= tw = int(self.patch)
+        th = tw = int(self.patch)
         i = np.random.randint(0, H - th + 1)
         j = np.random.randint(0, W - tw + 1)
         clean_crop = clean_arr[i:i+th, j:j+tw]
         art_crop   = art_arr  [i:i+th, j:j+tw]
-        # 4) to torch tensors, add channel dim
+        # to torch tensors, adding channel dimension
         clean = torch.from_numpy(clean_crop)[None]
         art   = torch.from_numpy(art_crop  )[None]
-
         return art, clean
 
 # ---------------- RepLKNet Regression Wrapper ---------------- #
@@ -138,7 +136,7 @@ class RepLKNetReg(nn.Module):
         small_kernel,
         dw_ratio=1,
         ffn_ratio=4,
-        in_ch=1,
+        in_channels=1,
         use_checkpoint=False,
         small_kernel_merged=False,
     ):
@@ -151,15 +149,15 @@ class RepLKNetReg(nn.Module):
             small_kernel=small_kernel,
             dw_ratio=dw_ratio,
             ffn_ratio=ffn_ratio,
-            in_channels=in_ch,
+            in_channels=in_channels,
             num_classes=None,
-            out_indices=[len(layers)-1],  # return only the last feature map
+            out_indices=[len(layers)-1],  # returns only the last feature map
             use_checkpoint=use_checkpoint,
             small_kernel_merged=small_kernel_merged,
             use_sync_bn=False,
             norm_intermediate_features=False
         )
-        # drop classifier head if present
+        # drops classifier head if present
         if hasattr(self.backbone, 'head'):
             del self.backbone.head
         if hasattr(self.backbone, 'avgpool'):
@@ -170,12 +168,11 @@ class RepLKNetReg(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         H, W = x.shape[-2], x.shape[-1]
         feats = self.backbone.forward_features(x)
-        # unwrap single-element list if needed
+        # unwraps single-element list if needed
         if isinstance(feats, list):
             feats = feats[0]
         out = self.decoder(feats)
         return F.interpolate(out, size=(H, W), mode='bilinear', align_corners=False)
-
 
 class SwinIRWrapper(nn.Module):
     def __init__(self, img_size=512, window_size=8, in_chans=1, out_chans=1,*, use_checkpoint: bool = False, **kwargs):
@@ -202,8 +199,8 @@ class RestormerWrapper(nn.Module):
                  inp_channels=1,
                  out_channels=1,
                  dim=48,
-                 num_blocks=[2, 2, 2, 2],            # lighter than default [4,6,6,8]
-                 num_refinement_blocks=2,            # lighter than default 4
+                 num_blocks=[2, 2, 2, 2],            
+                 num_refinement_blocks=2,            
                  heads=[1, 2, 4, 8],
                  ffn_expansion_factor=2.66,
                  bias=False,
@@ -225,7 +222,6 @@ class RestormerWrapper(nn.Module):
 
     def forward(self, x):
         return self.net(x)
-
 
 # ---------------- Args ---------------- #
 
@@ -250,29 +246,43 @@ def parse_args():
                    help="Number of blocks per RepLKNet stage")
     p.add_argument("--replk-channels",  nargs=4, type=int, default=[64,128,256,512],
                    help="Channel dims per RepLKNet stage")
-    p.add_argument("--replk-small",     type=int, default=5,    
+    p.add_argument("--replk-small",     type=int, default=5,
                    help="Small-kernel size for reparam conv")
     p.add_argument("--replk-drop-path", type=float, default=0.0,
                    help="Drop path rate for RepLKNet")
     p.add_argument("--patch", type=int, default=96, help="random crop size")
     return p.parse_args()
 
+# ---------------- Checkpoint folder mapping ---------------- #
 
+_FOLDER_MAP = {
+    "mr_lkv": "mr_lkv",
+    "unet": "unet",
+    "replk": "replknet",   
+    "swinir": "swinir",
+    "restormer": "restormer",
+}
 
+def _model_dir(ckpt_root: Path, model_name: str) -> Path:
+    key = model_name.lower()
+    folder = _FOLDER_MAP.get(key, key)
+    return Path(ckpt_root) / folder
 
 # ---------------- Train & Eval ---------------- #
 
 def main():
     args = parse_args()
     print(f"Starting training with model={args.model}…", flush=True)
-    # create a subdirectory for this model inside the checkpoint directory
-    args.ckpt_dir = args.ckpt_dir / args.model
-    args.ckpt_dir.mkdir(parents=True, exist_ok=True)
-    print(f"→ Checkpoints will be saved to: {args.ckpt_dir}")
+
+  
+    model_ckpt_dir = _model_dir(args.ckpt_dir, args.model)
+    model_ckpt_dir.mkdir(parents=True, exist_ok=True)
+    print(f"→ Checkpoints will be saved to: {model_ckpt_dir}")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # prepare data splits
-    dataset = SinogramDataset(args.clean_root, args.art_root , patch=args.patch)
+
+    # preparing data splits
+    dataset = SinogramDataset(args.clean_root, args.art_root, patch=args.patch)
     total   = len(dataset)
     n_train = int(TRAIN_FRAC * total)
     n_val   = int(VAL_FRAC   * total)
@@ -289,8 +299,7 @@ def main():
     test_loader  = DataLoader(test_ds,  batch_size=args.batch_size,
                               shuffle=False, num_workers=2, pin_memory=True)
 
-    # select model
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # selects model
     if args.model == "unet":
         model = UNet(in_channels=1, base_channels=64, levels=4,
                      norm_type="batch", dropout_bottleneck=0.1,
@@ -306,22 +315,25 @@ def main():
             final_activation=None
         ).to(device)
     elif args.model == "replk":
-        model = RepLKNetReg(large_kernel_sizes=args.replk_kernels, layers=args.replk_layers, channels=args.replk_channels, drop_path_rate=args.replk_drop_path, small_kernel=args.replk_small, in_ch=1).to(device)
+        model = RepLKNetReg(large_kernel_sizes=args.replk_kernels, layers=args.replk_layers,
+                            channels=args.replk_channels, drop_path_rate=args.replk_drop_path,
+                            small_kernel=args.replk_small, in_channels=1).to(device)
     elif args.model == "swinir":
-        model = SwinIRWrapper(img_size=512, window_size=8, in_chans=1, out_chans=1, depths=[4,4,4,4], embed_dim=64, num_heads=[2,2,2,2], mlp_ratio=2,use_checkpoint=True).to(device)
+        model = SwinIRWrapper(img_size=512, window_size=8, in_chans=1, out_chans=1,
+                              depths=[4,4,4,4], embed_dim=64, num_heads=[2,2,2,2],
+                              mlp_ratio=2, use_checkpoint=True).to(device)
     elif args.model == "restormer":
         model = RestormerWrapper(
             inp_channels=1,
             out_channels=1,
             dim=48,
-            num_blocks=[2,2,2,4],          # start small; you can scale up later
+            num_blocks=[2,2,2,4],          
             num_refinement_blocks=2,
             heads=[1,2,2,4],
             ffn_expansion_factor=2.0,
             bias=False,
             LayerNorm_type='WithBias'
         ).to(device)
-
     else:
         raise ValueError(f"Unknown model {args.model}")
 
@@ -380,15 +392,15 @@ def main():
         if val_loss < best_val:
             best_val = val_loss
             epochs_no_imp = 0
-            torch.save(model.state_dict(), args.ckpt_dir / "best_model.pth")
+            torch.save(model.state_dict(), model_ckpt_dir / "best_model.pth")
         else:
             epochs_no_imp += 1
             if epochs_no_imp >= EARLY_STOP_PATIENCE:
-                print(f"✋ Early stopping at epoch {epoch}")
+                print(f"Early stopping at epoch {epoch}")
                 break
 
         if epoch % args.save_interval == 0:
-            ckpt = args.ckpt_dir / f"epoch{epoch}.pth"
+            ckpt = model_ckpt_dir / f"epoch{epoch}.pth"
             torch.save(model.state_dict(), ckpt)
 
     # test
