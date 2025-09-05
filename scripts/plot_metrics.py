@@ -2,10 +2,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# 1. Load CSV (adjust path if needed)
-df = pd.read_csv("results/metrics_from_logs.csv")
+# 1. Load CSV 
+df = pd.read_csv("results/tables/metrics_from_logs.csv")
 
-# 2. Compute efficiency if not present
+# 2. Compute efficiency 
 if "psnr_per_Mparam" not in df.columns:
     df["psnr_per_Mparam"] = df["final_test_psnr"] / (df["params"] / 1e6)
 
@@ -15,6 +15,8 @@ def bar_plot(col, ylabel, fname):
     plt.bar(df["model"], df[col])
     plt.title(f"{ylabel} per Model")
     plt.ylabel(ylabel)
+    plt.yscale('log')
+
     plt.xticks(rotation=45, ha="right")
     plt.tight_layout()
     plt.savefig(f"results/figures/{fname}")
