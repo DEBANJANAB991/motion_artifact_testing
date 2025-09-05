@@ -1,0 +1,78 @@
+### Starting TaskPrologue of job 1199117 on tg080 at Wed Sep  3 02:18:59 PM CEST 2025
+Running on cores 0-1,16-17,32-33,48-49 with governor powersave
+Wed Sep  3 14:18:59 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.65.06              Driver Version: 580.65.06      CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3080        On  |   00000000:1A:00.0 Off |                  N/A |
+| 30%   34C    P8             16W /  300W |       1MiB /  10240MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+TRY: /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+SwinIR: True
+basicsr: True
+Starting training with model=restormer…
+→ Checkpoints will be saved to: /home/vault/iwi5/iwi5293h/models/restormer
+Model parameters: 12,163,286
+Epoch 1/100 — train: 0.037899, val: 0.003941 | PSNR: 25.31 dB, SSIM: 0.9404
+⇢ learning rate is now 1.00e-03
+Epoch 2/100 — train: 0.004553, val: 0.003466 | PSNR: 26.34 dB, SSIM: 0.9564
+⇢ learning rate is now 1.00e-03
+Epoch 3/100 — train: 574070787.315763, val: 18794.626725 | PSNR: -42.48 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 4/100 — train: 7838.932242, val: 1646.555881 | PSNR: -31.96 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 5/100 — train: 1003.411400, val: 311.048121 | PSNR: -24.79 dB, SSIM: 0.0002
+⇢ learning rate is now 1.00e-03
+Epoch 6/100 — train: 50185283494.257744, val: 2574332.668750 | PSNR: -63.98 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 7/100 — train: 1215691.199234, val: 417209.840500 | PSNR: -56.11 dB, SSIM: 0.0000
+⇢ learning rate is now 1.00e-03
+Epoch 8/100 — train: 229286.036109, val: 98276.575227 | PSNR: -49.86 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Epoch 9/100 — train: 6540814287.765131, val: 4157579.528000 | PSNR: -66.12 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Epoch 10/100 — train: 2367562.052211, val: 1117299.787500 | PSNR: -60.45 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Epoch 11/100 — train: 9286324638.999504, val: 43820372.828000 | PSNR: -76.28 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Epoch 12/100 — train: 6309737.226109, val: 1796359.203750 | PSNR: -62.47 dB, SSIM: 0.0000
+⇢ learning rate is now 5.00e-04
+Early stopping at epoch 12
+Final Test — Loss: 1800700.432500, PSNR: -62.46 dB, SSIM: 0.0000
+=== JOB_STATISTICS ===
+=== current date     : Wed Sep  3 03:30:35 PM CEST 2025
+= Job-ID             : 1199117 on tinygpu
+= Job-Name           : Restormer
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : rtx3080
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 01:11:37
+= Total RAM usage    : 15.0 GiB of requested  GiB (%)   
+= Node list          : tg080
+= Subm/Elig/Start/End: 2025-09-03T14:18:55 / 2025-09-03T14:18:55 / 2025-09-03T14:18:58 / 2025-09-03T15:30:35
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc              17.4G   104.9G   209.7G        N/A  17,365      500K   1,000K        N/A    
+    /home/woody            29.1G  1000.0G  1500.0G        N/A     110K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+NVIDIA GeForce RTX 3080, 00000000:1A:00.0, 2136881, 62 %, 28 %, 2244 MiB, 4284152 ms
