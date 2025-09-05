@@ -5,13 +5,13 @@
 # ===============================
 # SLURM Directives
 # ===============================
-#SBATCH --gres=gpu:v100:1               # Request 1 NVIDIA rtx3080 GPU
-#SBATCH --partition=v100               # Specify the GPU partition rtx3080
+#SBATCH --gres=gpu:rtx3080:1               # Request 1 NVIDIA rtx3080 GPU
+#SBATCH --partition=rtx3080               # Specify the GPU partition rtx3080
 #SBATCH --time=24:00:00                 # Maximum runtime of 24 hours
 #SBATCH --export=NONE                   # Do not export current environment variables
-#SBATCH --job-name=mprnet        # Job name
-#SBATCH --output=mprnet.out      # Standard output log file (%j expands to job ID)
-#SBATCH --error=mprnet.err       # Standard error log file (%j expands to job ID)
+#SBATCH --job-name=Replknet       # Job name
+#SBATCH --output=results/logs/Replknet.out      # Standard output log file (%j expands to job ID)
+#SBATCH --error=results/logs/Replknet.err       # Standard error log file (%j expands to job ID)
  
 # ===============================
 # Environment Configuration
@@ -50,17 +50,19 @@ cd /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts  # Replace with your 
 #python3 train_test_split.py --model mr_lkv --base-ch 32 --norm batch
   
 
-#python3 train_test_split.py \
- # --model swinir \
+#python3 train_test_split.py --model swinir
 #python3 train_test_split.py --model restormer --batch-size 2 --patch 96
-python3 train_test_split.py --model mprnet --patch 96 --batch-size 4 --epochs 50
-
-
-
-#python3 train_test_split.py --model replk
+#python3 train_test_split.py --model uformer --patch 96
+python3 train_test_split.py --model replk
 #python3 compute_flops.py
 #python3 add_motion_artifacts.py
 #python3 dicom_to_sinogram.py
 
+#python3 comparison.py \
+ # --log-dir results/logs \
+  #--out results/tables/metrics_from_logs.csv \
+  #--fig-dir /results/figures
+
+#python3 compare_models.py
 
 
