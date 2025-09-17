@@ -19,13 +19,24 @@ All the codes are present inside the scripts folder:
 -> evaluate.py (For testing data and computing metrics).
 -> config.py
 
-# Comparison plot among MR_LKV, REPLKNET AND UNET:
+# Takeaway from the Observations and Comparison:
+# 1. Parameter‐efficiency
+
+    MR_LKV: 3.65 M params
+    U-Net: 31.04 M params
+    RepLKNet: 21.79 M
+    SwinIR: 0.73 M
+    Restormer: 12.16 M
+    Swin2SR: 1.06 M
 
 
+# 2. Inference time
 
-<img width="640" height="480" alt="model_comparison_ssim" src="https://github.com/user-attachments/assets/4c7d6ecd-a8a3-4c1a-820c-5a051551fee7" />
+    MR_LKV: 6.17 ms
+    U-Net: 4.84 ms
+    RepLKNet: 20.09 ms
+    SwinIR: 47.43 ms
+    Restormer: 22.61 ms
+    Swin2SR: 25.66 ms
 
-
-
-<img width="640" height="480" alt="model_comparison_psnr" src="https://github.com/user-attachments/assets/50859a2c-2299-48ec-afb9-d080d702b84f" />
-
+# MR_LKV is significantly more parameter‐efficient than most baselines and offers one of the fastest inference times (only U-Net is slightly faster), all while maintaining comparable reconstruction quality
