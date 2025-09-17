@@ -18,6 +18,7 @@ sys.path.insert(0, str(repo_root))
 
 sys.path.insert(0, str(repo_root / "Restormer"))
 
+sys.path.insert(0, str(repo_root / "swin2sr"))
 import importlib
 print("TRY:", repo_root)
 print("SwinIR:", importlib.util.find_spec("SwinIR") is not None)
@@ -26,6 +27,9 @@ print("basicsr:", importlib.util.find_spec("basicsr") is not None)
 from MR_LKV_refactorv2 import MR_LKV      # MR-LKV implementation
 from UNet import UNet                     # U-Net baseline
 from replknet import RepLKNet             # Original RepLKNet backbone
+from models.network_swin2sr import Swin2SR
+
+
 from SwinIR.models.network_swinir import SwinIR
 # Restormer import (repo: swz30/Restormer)
 try:
@@ -223,11 +227,54 @@ class RestormerWrapper(nn.Module):
     def forward(self, x):
         return self.net(x)
 
+class Swin2SRWrapper(nn.Module):
+    def __init__(
+        self,
+        in_ch=1,
+        embed_dim=96,
+        depths=(6,6,6,6),
+        num_heads=(6,6,6,6),
+        window_size=8,
+        upscale=1,
+        upsampler='',
+        img_range=1.0,
+        img_size=(96,96),
+    ):
+        super().__init__()
+        self.net = Swin2SR(
+            img_size=img_size,        # must be a multiple of window_size
+            patch_size=1,             # your patch size
+            in_chans=in_ch,
+            embed_dim=embed_dim,
+            depths=list(depths),
+            num_heads=list(num_heads),
+            window_size=window_size,
+            mlp_ratio=4.0,
+            qkv_bias=True,
+            drop_rate=0.0,
+            attn_drop_rate=0.0,
+            drop_path_rate=0.1,
+            norm_layer=nn.LayerNorm,
+            ape=False,
+            patch_norm=True,
+            use_checkpoint=False,
+            upscale=upscale,
+            img_range=img_range,
+            upsampler=upsampler,
+            resi_connection='1conv',
+        )
+
+    def forward(self, x):
+        # ensure input is padded internally if needed
+        x = self.net.check_image_size(x)
+        return self.net(x)
+
+
 # ---------------- Args ---------------- #
 
 def parse_args():
     p = argparse.ArgumentParser(description="Train artifact-reduction models")
-    p.add_argument("--model", choices=["mr_lkv", "unet", "replk","swinir","restormer"], default="mr_lkv",
+    p.add_argument("--model", choices=["mr_lkv", "unet", "replk","swinir","restormer","swin2sr"], default="mr_lkv",
                    help="Which architecture to train")
     p.add_argument("--clean-root",   type=Path, default=Path(CLEAN_SINOGRAM_ROOT))
     p.add_argument("--art-root",     type=Path, default=Path(ARTIFACT_ROOT))
@@ -261,6 +308,7 @@ _FOLDER_MAP = {
     "replk": "replknet",   
     "swinir": "swinir",
     "restormer": "restormer",
+    "swin2sr": "swin2sr",
 }
 
 def _model_dir(ckpt_root: Path, model_name: str) -> Path:
@@ -334,6 +382,20 @@ def main():
             bias=False,
             LayerNorm_type='WithBias'
         ).to(device)
+    elif args.model == "swin2sr":
+        model = Swin2SRWrapper(
+            in_ch=1,
+            embed_dim=64,
+            depths=(4,4,4,4),
+            num_heads=(4,4,4,4),
+            window_size=8,        # divides 96 exactly
+            upscale=1,            # for artifact removal
+            upsampler='',         # no upsampling
+            img_range=1.0,
+            img_size=(64,64),     # your dataset’s crop size
+        ).to(device)
+
+
     else:
         raise ValueError(f"Unknown model {args.model}")
 
