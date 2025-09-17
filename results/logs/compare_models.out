@@ -1,0 +1,98 @@
+### Starting TaskPrologue of job 1223996 on tg080 at Wed Sep 17 02:26:46 PM CEST 2025
+Running on cores 6-7,22-23,38-39,54-55 with governor powersave
+Wed Sep 17 14:26:46 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.65.06              Driver Version: 580.65.06      CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3080        On  |   00000000:3E:00.0 Off |                  N/A |
+| 30%   33C    P8             17W /  300W |      33MiB /  10240MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+TRY: /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+SwinIR: True
+basicsr: True
+
+=== Evaluating mr_lkv ===
+
+=== Evaluating unet ===
+
+=== Evaluating replknet ===
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+drop path: Identity()
+
+=== Evaluating swinir ===
+
+=== Evaluating restormer ===
+
+=== Evaluating swin2sr ===
+
+Model Comparison:
+ | model     |   params (M) | FLOPs       |   Inf (ms) |   PSNR (dB) |     SSIM |
+|:----------|-------------:|:------------|-----------:|------------:|---------:|
+| mr_lkv    |     3.65088  | 187.51 MMac |    7.29602 |     23.8309 | 0.935257 |
+| unet      |    31.0424   | 3.42 GMac   |    6.00108 |     29.0784 | 0.94636  |
+| replknet  |    21.7928   | 371.95 MMac |   23.0641  |     14.4668 | 0.49697  |
+| swinir    |     0.728865 | 2.97 GMac   |   56.7672  |     25.2205 | 0.928061 |
+| restormer |    12.1633   | 3.68 GMac   |   26.999   |     24.4451 | 0.936759 |
+| swin2sr   |     1.06304  | 3.36 GMac   |   29.8243  |     22.1322 | 0.931664 |
+Saved metrics → results/tables
+Saved plot → results/tables/model_comparison_plots.png
+=== JOB_STATISTICS ===
+=== current date     : Wed Sep 17 02:32:02 PM CEST 2025
+= Job-ID             : 1223996 on tinygpu
+= Job-Name           : compare_models
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : rtx3080
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 00:05:27
+= Total RAM usage    : 3.6 GiB of requested  GiB (%)   
+= Node list          : tg080
+= Subm/Elig/Start/End: 2025-09-17T14:26:34 / 2025-09-17T14:26:34 / 2025-09-17T14:26:35 / 2025-09-17T14:32:02
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/woody            32.2G  1000.0G  1500.0G        N/A     158K   5,000K   7,500K        N/A    
+    /home/vault           366.1G  1048.6G  2097.2G        N/A     196K     200K     400K        N/A    
+    /home/hpc              18.5G   104.9G   209.7G        N/A  21,679      500K   1,000K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+NVIDIA GeForce RTX 3080, 00000000:3E:00.0, 1044964, 17 %, 3 %, 2064 MiB, 306768 ms
