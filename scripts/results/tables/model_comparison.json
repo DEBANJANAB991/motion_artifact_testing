@@ -1,0 +1,6 @@
+{"model":"mr_lkv","params (M)":3.650879,"FLOPs":"187.51 MMac","Inf (ms)":6.1661674805,"PSNR (dB)":23.5961182715,"SSIM":0.9358613495}
+{"model":"unet","params (M)":31.042369,"FLOPs":"3.42 GMac","Inf (ms)":4.8413500977,"PSNR (dB)":28.8995767664,"SSIM":0.9489391343}
+{"model":"replknet","params (M)":21.792833,"FLOPs":"371.95 MMac","Inf (ms)":20.0861347656,"PSNR (dB)":14.6583197004,"SSIM":0.503843332}
+{"model":"swinir","params (M)":0.728865,"FLOPs":"2.97 GMac","Inf (ms)":47.4339609375,"PSNR (dB)":25.1467074298,"SSIM":0.9265449059}
+{"model":"restormer","params (M)":12.163286,"FLOPs":"3.68 GMac","Inf (ms)":22.6095039063,"PSNR (dB)":24.6103519582,"SSIM":0.9342712885}
+{"model":"swin2sr","params (M)":1.063041,"FLOPs":"3.36 GMac","Inf (ms)":25.6572167969,"PSNR (dB)":22.0641286882,"SSIM":0.9336784508}
