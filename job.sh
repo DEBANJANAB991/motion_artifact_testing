@@ -9,9 +9,9 @@
 #SBATCH --partition=rtx3080               # Specify the GPU partition rtx3080
 #SBATCH --time=24:00:00                 # Maximum runtime of 24 hours
 #SBATCH --export=NONE                   # Do not export current environment variables
-#SBATCH --job-name=Replknet       # Job name
-#SBATCH --output=results/logs/Replknet.out      # Standard output log file (%j expands to job ID)
-#SBATCH --error=results/logs/Replknet.err       # Standard error log file (%j expands to job ID)
+#SBATCH --job-name=swin2sr       # Job name
+#SBATCH --output=results/logs/swin2sr.out      # Standard output log file (%j expands to job ID)
+#SBATCH --error=results/logs/swin2sr.err       # Standard error log file (%j expands to job ID)
  
 # ===============================
 # Environment Configuration
@@ -48,15 +48,13 @@ cd /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts  # Replace with your 
 # Run the Optuna-based FixMatch HPO Python script with necessary arguments
 #python3 -u train_test_split.py --model unet
 #python3 train_test_split.py --model mr_lkv --base-ch 32 --norm batch
-  
-
 #python3 train_test_split.py --model swinir
 #python3 train_test_split.py --model restormer --batch-size 2 --patch 96
-#python3 train_test_split.py --model uformer --patch 96
-python3 train_test_split.py --model replk
+#python3 train_test_split.py --model replk
 #python3 compute_flops.py
 #python3 add_motion_artifacts.py
 #python3 dicom_to_sinogram.py
+python3 train_test_split.py --model swin2sr
 
 #python3 comparison.py \
  # --log-dir results/logs \
