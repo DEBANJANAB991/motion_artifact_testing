@@ -14,7 +14,7 @@ This repository contains PyTorch code for training, evaluating, and visualizing 
 All the codes are present inside the scripts folder:
 -> dicom_to_sinogram.py (To convert from volume domain to projection domain).
 -> add_motion_artifacts.py (Adding cubic spline artifacts).
--> model_mr_lkv.py (model for training).
+-> MR_LKVV2.py (model for training).
 -> train_test_split.py (For training script).
 -> evaluate.py (For testing data and computing metrics).
 -> config.py
