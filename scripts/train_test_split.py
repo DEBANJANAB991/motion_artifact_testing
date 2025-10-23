@@ -2,7 +2,10 @@
 import sys
 from pathlib import Path
 import argparse
-
+import matplotlib.pyplot as plt
+import os
+from torchvision.utils import make_grid, save_image
+import csv
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -319,9 +322,12 @@ def _model_dir(ckpt_root: Path, model_name: str) -> Path:
 # ---------------- Train & Eval ---------------- #
 
 def main():
+    
+
     args = parse_args()
     print(f"Starting training with model={args.model}…", flush=True)
-
+    results_dir = Path(__file__).resolve().parent / "results" / "plots"/args.model
+    results_dir.mkdir(parents=True, exist_ok=True)
   
     model_ckpt_dir = _model_dir(args.ckpt_dir, args.model)
     model_ckpt_dir.mkdir(parents=True, exist_ok=True)
@@ -411,6 +417,12 @@ def main():
     best_val = float('inf')
     epochs_no_imp = 0
     EARLY_STOP_PATIENCE = 10
+    # ---- Logging setup ---- #
+    log_path = results_dir  / "training_log.csv"
+    with open(log_path, "w") as f:
+        f.write("epoch,train_loss,val_loss,val_psnr,val_ssim\n")
+
+    train_losses, val_losses, psnr_scores, ssim_scores = [], [], [], []
 
     for epoch in range(1, args.epochs + 1):
         # train
@@ -445,9 +457,16 @@ def main():
         val_loss = running_val / n_val
         val_psnr = running_psnr / n_val
         val_ssim = running_ssim / n_val
-        print(f"Epoch {epoch}/{args.epochs} — train: {train_loss:.6f}, "
-              f"val: {val_loss:.6f} | PSNR: {val_psnr:.2f} dB, "
-              f"SSIM: {val_ssim:.4f}", flush=True)
+        print(f"Epoch {epoch}/{args.epochs} — "f"Train: {train_loss:.6f}, Val: {val_loss:.6f} | "f"PSNR: {val_psnr:.2f} dB, SSIM: {val_ssim:.4f}", flush=True)
+        # ---- Save to CSV log ---- #
+        with open(log_path, "a") as f:
+            f.write(f"{epoch},{train_loss:.6f},{val_loss:.6f},{val_psnr:.4f},{val_ssim:.4f}\n")
+
+        # ---- Store for plotting ---- #
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+        psnr_scores.append(val_psnr)
+        ssim_scores.append(val_ssim)
 
         scheduler.step(val_loss)
         print(f"⇢ learning rate is now {scheduler.get_last_lr()[0]:.2e}")
@@ -464,6 +483,31 @@ def main():
         if epoch % args.save_interval == 0:
             ckpt = model_ckpt_dir / f"epoch{epoch}.pth"
             torch.save(model.state_dict(), ckpt)
+    # ---- Plot training curves ---- #
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    plt.plot(train_losses, label="Train Loss", marker='o')
+    plt.plot(val_losses, label="Val Loss", marker='o')
+    plt.title("Loss Curves")
+    plt.xlabel("Epoch")
+    plt.ylabel("MSE Loss")
+    plt.legend()
+    plt.grid(True)
+
+    plt.subplot(1, 2, 2)
+    plt.plot(psnr_scores, label="Val PSNR (dB)", marker='s')
+    plt.plot(ssim_scores, label="Val SSIM", marker='s')
+    plt.title("Validation Metrics")
+    plt.xlabel("Epoch")
+    plt.legend()
+    plt.grid(True)
+
+    plot_path = results_dir  / "training_curves.png"
+    plt.tight_layout()
+    plt.savefig(plot_path)
+    plt.close()
+    print(f"Saved training curves to {plot_path}")
 
     # test
     model.eval()
