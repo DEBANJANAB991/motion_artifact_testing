@@ -1,0 +1,11 @@
+/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/timm/models/layers/__init__.py:48: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+Traceback (most recent call last):
+  File "/home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/compare_models.py", line 145, in <module>
+    main()
+  File "/home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/compare_models.py", line 66, in main
+    model.load_state_dict(torch.load(ckpt, map_location=DEVICE))
+  File "/home/woody/iwi5/iwi5293h/software/private/conda/envs/thesis-gpu/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2153, in load_state_dict
+    raise RuntimeError('Error(s) in loading state_dict for {}:\n\t{}'.format(
+RuntimeError: Error(s) in loading state_dict for MR_LKV:
+	Unexpected key(s) in state_dict: "stage0.1.conv.weight", "stage0.1.pw.weight", "stage0.1.pw.bias", "stage0.1.norm.weight", "stage0.1.norm.bias", "stage0.1.norm.running_mean", "stage0.1.norm.running_var", "stage0.1.norm.num_batches_tracked", "stage1.1.conv.weight", "stage1.1.pw.weight", "stage1.1.pw.bias", "stage1.1.norm.weight", "stage1.1.norm.bias", "stage1.1.norm.running_mean", "stage1.1.norm.running_var", "stage1.1.norm.num_batches_tracked", "stage2.1.conv.weight", "stage2.1.pw.weight", "stage2.1.pw.bias", "stage2.1.norm.weight", "stage2.1.norm.bias", "stage2.1.norm.running_mean", "stage2.1.norm.running_var", "stage2.1.norm.num_batches_tracked", "stage2.2.conv.weight", "stage2.2.pw.weight", "stage2.2.pw.bias", "stage2.2.norm.weight", "stage2.2.norm.bias", "stage2.2.norm.running_mean", "stage2.2.norm.running_var", "stage2.2.norm.num_batches_tracked", "stage3.1.conv.weight", "stage3.1.pw.weight", "stage3.1.pw.bias", "stage3.1.norm.weight", "stage3.1.norm.bias", "stage3.1.norm.running_mean", "stage3.1.norm.running_var", "stage3.1.norm.num_batches_tracked". 

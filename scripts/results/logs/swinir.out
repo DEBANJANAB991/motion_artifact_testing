@@ -1,0 +1,148 @@
+### Starting TaskPrologue of job 1289697 on tg073 at Sat Oct 25 12:02:19 PM CEST 2025
+Running on cores 4-5,12-13,20-21,28-29 with governor ondemand
+Sat Oct 25 12:02:19 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.195.03             Driver Version: 570.195.03     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           Off |   00000000:86:00.0 Off |                    0 |
+| N/A   32C    P0             24W /  250W |       0MiB /  32768MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+TRY: /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+SwinIR: True
+basicsr: True
+Starting training with model=swinir…
+→ Checkpoints will be saved to: /home/vault/iwi5/iwi5293h/models/swinir
+Model parameters: 728,865
+Epoch 1/100 — Train: 0.020056, Val: 0.009334 | PSNR: 20.82 dB, SSIM: 0.9264
+⇢ learning rate is now 1.00e-03
+Epoch 2/100 — Train: 0.007428, Val: 0.006315 | PSNR: 22.36 dB, SSIM: 0.9384
+⇢ learning rate is now 1.00e-03
+Epoch 3/100 — Train: 0.006394, Val: 0.005048 | PSNR: 23.41 dB, SSIM: 0.9431
+⇢ learning rate is now 1.00e-03
+Epoch 4/100 — Train: 0.005882, Val: 0.005850 | PSNR: 22.86 dB, SSIM: 0.9453
+⇢ learning rate is now 1.00e-03
+Epoch 5/100 — Train: 0.005842, Val: 0.006036 | PSNR: 22.51 dB, SSIM: 0.9338
+⇢ learning rate is now 1.00e-03
+Epoch 6/100 — Train: 0.005700, Val: 0.005411 | PSNR: 23.03 dB, SSIM: 0.9472
+⇢ learning rate is now 1.00e-03
+Epoch 7/100 — Train: 0.005781, Val: 0.004768 | PSNR: 23.67 dB, SSIM: 0.9456
+⇢ learning rate is now 1.00e-03
+Epoch 8/100 — Train: 0.005408, Val: 0.005536 | PSNR: 22.90 dB, SSIM: 0.9363
+⇢ learning rate is now 1.00e-03
+Epoch 9/100 — Train: 0.005472, Val: 0.005134 | PSNR: 23.22 dB, SSIM: 0.9477
+⇢ learning rate is now 1.00e-03
+Epoch 10/100 — Train: 0.005293, Val: 0.005511 | PSNR: 22.88 dB, SSIM: 0.9470
+⇢ learning rate is now 1.00e-03
+Epoch 11/100 — Train: 0.005239, Val: 0.004901 | PSNR: 23.44 dB, SSIM: 0.9462
+⇢ learning rate is now 1.00e-03
+Epoch 12/100 — Train: 0.005134, Val: 0.004977 | PSNR: 23.32 dB, SSIM: 0.9442
+⇢ learning rate is now 1.00e-03
+Epoch 13/100 — Train: 0.004972, Val: 0.005614 | PSNR: 22.84 dB, SSIM: 0.9424
+⇢ learning rate is now 5.00e-04
+Epoch 14/100 — Train: 0.004639, Val: 0.004321 | PSNR: 23.99 dB, SSIM: 0.9486
+⇢ learning rate is now 5.00e-04
+Epoch 15/100 — Train: 0.004521, Val: 0.004535 | PSNR: 23.71 dB, SSIM: 0.9464
+⇢ learning rate is now 5.00e-04
+Epoch 16/100 — Train: 0.004559, Val: 0.004448 | PSNR: 23.93 dB, SSIM: 0.9486
+⇢ learning rate is now 5.00e-04
+Epoch 17/100 — Train: 0.004480, Val: 0.004361 | PSNR: 23.91 dB, SSIM: 0.9500
+⇢ learning rate is now 5.00e-04
+Epoch 18/100 — Train: 0.004494, Val: 0.004322 | PSNR: 24.01 dB, SSIM: 0.9441
+⇢ learning rate is now 5.00e-04
+Epoch 19/100 — Train: 0.004459, Val: 0.004395 | PSNR: 23.92 dB, SSIM: 0.9443
+⇢ learning rate is now 5.00e-04
+Epoch 20/100 — Train: 0.004503, Val: 0.004273 | PSNR: 23.98 dB, SSIM: 0.9472
+⇢ learning rate is now 5.00e-04
+Epoch 21/100 — Train: 0.004436, Val: 0.004253 | PSNR: 24.12 dB, SSIM: 0.9491
+⇢ learning rate is now 5.00e-04
+Epoch 22/100 — Train: 0.004455, Val: 0.004575 | PSNR: 23.70 dB, SSIM: 0.9389
+⇢ learning rate is now 5.00e-04
+Epoch 23/100 — Train: 0.004397, Val: 0.004234 | PSNR: 24.09 dB, SSIM: 0.9464
+⇢ learning rate is now 5.00e-04
+Epoch 24/100 — Train: 0.004271, Val: 0.004301 | PSNR: 23.97 dB, SSIM: 0.9422
+⇢ learning rate is now 5.00e-04
+Epoch 25/100 — Train: 0.004473, Val: 0.004555 | PSNR: 23.65 dB, SSIM: 0.9398
+⇢ learning rate is now 5.00e-04
+Epoch 26/100 — Train: 0.004436, Val: 0.004223 | PSNR: 24.04 dB, SSIM: 0.9452
+⇢ learning rate is now 5.00e-04
+Epoch 27/100 — Train: 0.004301, Val: 0.004410 | PSNR: 23.83 dB, SSIM: 0.9447
+⇢ learning rate is now 5.00e-04
+Epoch 28/100 — Train: 0.004387, Val: 0.004205 | PSNR: 24.09 dB, SSIM: 0.9463
+⇢ learning rate is now 5.00e-04
+Epoch 29/100 — Train: 0.004311, Val: 0.004199 | PSNR: 24.02 dB, SSIM: 0.9469
+⇢ learning rate is now 5.00e-04
+Epoch 30/100 — Train: 0.004317, Val: 0.004420 | PSNR: 23.82 dB, SSIM: 0.9425
+⇢ learning rate is now 5.00e-04
+Epoch 31/100 — Train: 0.004263, Val: 0.004020 | PSNR: 24.29 dB, SSIM: 0.9480
+⇢ learning rate is now 5.00e-04
+Epoch 32/100 — Train: 0.004279, Val: 0.004130 | PSNR: 24.17 dB, SSIM: 0.9438
+⇢ learning rate is now 5.00e-04
+Epoch 33/100 — Train: 0.004295, Val: 0.004249 | PSNR: 24.03 dB, SSIM: 0.9422
+⇢ learning rate is now 5.00e-04
+Epoch 34/100 — Train: 0.004280, Val: 0.004345 | PSNR: 23.93 dB, SSIM: 0.9491
+⇢ learning rate is now 5.00e-04
+Epoch 35/100 — Train: 0.004272, Val: 0.004329 | PSNR: 23.90 dB, SSIM: 0.9451
+⇢ learning rate is now 5.00e-04
+Epoch 36/100 — Train: 0.004237, Val: 0.003852 | PSNR: 24.47 dB, SSIM: 0.9496
+⇢ learning rate is now 5.00e-04
+Epoch 37/100 — Train: 0.004323, Val: 0.004135 | PSNR: 24.14 dB, SSIM: 0.9450
+⇢ learning rate is now 5.00e-04
+Epoch 38/100 — Train: 0.004288, Val: 0.003976 | PSNR: 24.27 dB, SSIM: 0.9489
+⇢ learning rate is now 5.00e-04
+Epoch 39/100 — Train: 0.004239, Val: 0.004115 | PSNR: 24.16 dB, SSIM: 0.9495
+⇢ learning rate is now 5.00e-04
+Epoch 40/100 — Train: 0.004248, Val: 0.004121 | PSNR: 24.19 dB, SSIM: 0.9466
+⇢ learning rate is now 5.00e-04
+Epoch 41/100 — Train: 0.004195, Val: 0.004561 | PSNR: 23.77 dB, SSIM: 0.9410
+⇢ learning rate is now 5.00e-04
+Epoch 42/100 — Train: 0.004197, Val: 0.003861 | PSNR: 24.50 dB, SSIM: 0.9483
+⇢ learning rate is now 2.50e-04
+Epoch 43/100 — Train: 0.004088, Val: 0.003978 | PSNR: 24.40 dB, SSIM: 0.9465
+⇢ learning rate is now 2.50e-04
+Epoch 44/100 — Train: 0.004071, Val: 0.004077 | PSNR: 24.22 dB, SSIM: 0.9426
+⇢ learning rate is now 2.50e-04
+Epoch 45/100 — Train: 0.003988, Val: 0.004112 | PSNR: 24.14 dB, SSIM: 0.9466
+⇢ learning rate is now 2.50e-04
+Epoch 46/100 — Train: 0.004097, Val: 0.004120 | PSNR: 24.15 dB, SSIM: 0.9465
+⇢ learning rate is now 2.50e-04
+Early stopping at epoch 46
+Saved training curves to /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/plots/swinir/training_curves.png
+Final Test — Loss: 0.003946, PSNR: 24.33 dB, SSIM: 0.9470
+Saved example sinogram comparisons to /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/plots/swinir/samples
+=== JOB_STATISTICS ===
+=== current date     : Sat Oct 25 03:48:11 PM CEST 2025
+= Job-ID             : 1289697 on tinygpu
+= Job-Name           : swinir
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : v100
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 03:45:52
+= Total RAM usage    : 15.5 GiB of requested  GiB (%)   
+= Node list          : tg073
+= Subm/Elig/Start/End: 2025-10-25T12:01:56 / 2025-10-25T12:01:56 / 2025-10-25T12:01:57 / 2025-10-25T15:47:49
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc              18.6G   104.9G   209.7G        N/A  21,771      500K   1,000K        N/A    
+    /home/woody            32.2G  1000.0G  1500.0G        N/A     158K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:86:00.0, 1271681, 84 %, 45 %, 1786 MiB, 13520224 ms
