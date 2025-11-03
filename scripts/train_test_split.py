@@ -87,6 +87,15 @@ def ssim(pred: torch.Tensor, target: torch.Tensor,
     ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / \
                ((mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2))
     return ssim_map.mean()
+#defining L1 +SSIM Loss
+class L1SSIMLoss(nn.Module):
+    def __init__(self, alpha=0.84):
+        super().__init__()
+        self.alpha = alpha
+        self.l1 = nn.L1Loss()
+
+    def forward(self, pred, target):
+        return (1 - self.alpha) * self.l1(pred, target) + self.alpha * (1 - ssim(pred, target))
 
 # ---------------- Data ---------------- #
 
@@ -409,10 +418,16 @@ def main():
     print(f"Model parameters: {total_params:,}")
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=0.5, patience=5
+    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+     #   optimizer, mode='min', factor=0.5, patience=5
+    #)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    optimizer, T_max=args.epochs, eta_min=1e-6
     )
-    criterion = nn.MSELoss(reduction='mean')
+
+   # criterion = nn.MSELoss(reduction='mean')
+    criterion = L1SSIMLoss(alpha=0.84)
+
 
     best_val = float('inf')
     epochs_no_imp = 0
@@ -468,7 +483,9 @@ def main():
         psnr_scores.append(val_psnr)
         ssim_scores.append(val_ssim)
 
-        scheduler.step(val_loss)
+        #scheduler.step(val_loss)
+        scheduler.step()
+
         print(f"⇢ learning rate is now {scheduler.get_last_lr()[0]:.2e}")
         if val_loss < best_val:
             best_val = val_loss
