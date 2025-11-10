@@ -97,6 +97,16 @@ class L1SSIMLoss(nn.Module):
     def forward(self, pred, target):
         return (1 - self.alpha) * self.l1(pred, target) + self.alpha * (1 - ssim(pred, target))
 
+#code to save reconstructed sinograms
+def save_recon_sinos(recon_batch, epoch, recon_dir, max_imgs=3):
+    """
+    Save only reconstructed sinograms.
+    """
+    for i in range(min(max_imgs, recon_batch.size(0))):
+        save_path = recon_dir / f"epoch{epoch:03d}_sino{i}.png"
+        save_image(recon_batch[i], save_path)
+
+
 # ---------------- Data ---------------- #
 
 TRAIN_FRAC = 0.8
@@ -296,7 +306,7 @@ def parse_args():
     p.add_argument("--epochs",       type=int, default=EPOCHS)
     p.add_argument("--save-interval",type=int, default=SAVE_INTERVAL)
     p.add_argument("--base-ch",      type=int, default=32, help="Base channels for MR_LKV")
-    p.add_argument("--norm", choices=["batch","instance","none"], default="batch")
+    p.add_argument("--norm", choices=["batch","instance","group", "layer","none"], default="batch")
     p.add_argument("--no-decoder", action="store_true",
                    help="Disable decoder in MR_LKV")
     p.add_argument("--replk-kernels",   nargs=4, type=int, default=[31,29,27,13],
@@ -337,7 +347,8 @@ def main():
     print(f"Starting training with model={args.model}…", flush=True)
     results_dir = Path(__file__).resolve().parent / "results" / "plots"/args.model
     results_dir.mkdir(parents=True, exist_ok=True)
-  
+    recon_dir = results_dir/"recon_sino"
+    recon_dir.mkdir(parents=True, exist_ok=True)
     model_ckpt_dir = _model_dir(args.ckpt_dir, args.model)
     model_ckpt_dir.mkdir(parents=True, exist_ok=True)
     print(f"→ Checkpoints will be saved to: {model_ckpt_dir}")
@@ -371,8 +382,8 @@ def main():
         model = MR_LKV(
             in_channels=1,
             base_channels=args.base_ch,
-            depths=[1,1,1,1],
-            kernels=[31,51,71,91],
+            depths=[2,2,3,2],
+            kernels=[35,55,75,95],
             norm_type=args.norm,
             use_decoder=(not args.no_decoder),
             final_activation=None
@@ -418,15 +429,11 @@ def main():
     print(f"Model parameters: {total_params:,}")
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
-    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-     #   optimizer, mode='min', factor=0.5, patience=5
-    #)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-    optimizer, T_max=args.epochs, eta_min=1e-6
-    )
-
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
+    #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-6)
+    scheduler.step(val_loss)
    # criterion = nn.MSELoss(reduction='mean')
-    criterion = L1SSIMLoss(alpha=0.84)
+    criterion = L1SSIMLoss(alpha=0.7) #changed from 0.84 to 0.7 for more pixel focus
 
 
     best_val = float('inf')
@@ -483,8 +490,8 @@ def main():
         psnr_scores.append(val_psnr)
         ssim_scores.append(val_ssim)
 
-        #scheduler.step(val_loss)
-        scheduler.step()
+        scheduler.step(val_loss)
+       
 
         print(f"⇢ learning rate is now {scheduler.get_last_lr()[0]:.2e}")
         if val_loss < best_val:
@@ -530,12 +537,21 @@ def main():
     model.eval()
     running_test = running_psnr = running_ssim = 0.0
     with torch.no_grad():
-        for art, clean in test_loader:
+        for batch_idx, (art, clean) in enumerate(test_loader):
+        #for art, clean in test_loader:
             art, clean = art.to(device), clean.to(device)
             pred = model(art)
             if pred.shape[-2:] != clean.shape[-2:]:
                 pred = F.interpolate(pred, size=clean.shape[-2:],
                                      mode='bilinear', align_corners=False)
+            # Save only reconstructed sinograms for first batch
+            if batch_idx == 0:
+                #save_recon_sinos(pred, epoch, recon_dir, max_imgs=3)
+                save_image(art[0], recon_dir / f"epoch{epoch:03d}_input.png")
+                save_image(pred[0], recon_dir / f"epoch{epoch:03d}_recon.png")
+                save_image(clean[0], recon_dir / f"epoch{epoch:03d}_target.png")
+
+                print(f"Saved reconstructed sinograms to {recon_dir}")
             running_test   += criterion(pred, clean).item() * art.size(0)
             running_psnr   += psnr(pred, clean).item() * art.size(0)
             running_ssim   += ssim(pred, clean).item() * art.size(0)
