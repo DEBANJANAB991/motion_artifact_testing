@@ -1,6 +1,6 @@
-### Starting TaskPrologue of job 1307538 on tg081 at Thu Nov  6 09:25:15 PM CET 2025
+### Starting TaskPrologue of job 1309226 on tg083 at Mon Nov 10 01:04:35 AM CET 2025
 Running on cores 14-15,30-31,46-47,62-63 with governor powersave
-Thu Nov  6 21:25:15 2025       
+Mon Nov 10 01:04:35 2025       
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 580.95.05              Driver Version: 580.95.05      CUDA Version: 13.0     |
 +-----------------------------------------+------------------------+----------------------+
@@ -9,7 +9,7 @@ Thu Nov  6 21:25:15 2025
 |                                         |                        |               MIG M. |
 |=========================================+========================+======================|
 |   0  NVIDIA GeForce RTX 3080        On  |   00000000:DB:00.0 Off |                  N/A |
-| 30%   42C    P8             15W /  300W |       1MiB /  10240MiB |      0%      Default |
+| 30%   34C    P8             11W /  300W |       1MiB /  10240MiB |      0%      Default |
 |                                         |                        |                  N/A |
 +-----------------------------------------+------------------------+----------------------+
 
@@ -27,91 +27,128 @@ SwinIR: True
 basicsr: True
 Starting training with model=mr_lkv…
 → Checkpoints will be saved to: /home/vault/iwi5/iwi5293h/models/mr_lkv
-Model parameters: 3,650,879
-Epoch 1/100 — Train: 0.059046, Val: 0.043415 | PSNR: 24.68 dB, SSIM: 0.9562
+Model parameters: 8,040,127
+Epoch 1/100 — Train: 0.055978, Val: 0.041923 | PSNR: 24.76 dB, SSIM: 0.9569
 ⇢ learning rate is now 1.00e-03
-Epoch 2/100 — Train: 0.043415, Val: 0.036747 | PSNR: 26.02 dB, SSIM: 0.9625
-⇢ learning rate is now 9.99e-04
-Epoch 3/100 — Train: 0.040372, Val: 0.038463 | PSNR: 25.85 dB, SSIM: 0.9604
-⇢ learning rate is now 9.98e-04
-Epoch 4/100 — Train: 0.039585, Val: 0.040268 | PSNR: 25.33 dB, SSIM: 0.9591
-⇢ learning rate is now 9.96e-04
-Epoch 5/100 — Train: 0.038738, Val: 0.037440 | PSNR: 25.63 dB, SSIM: 0.9623
-⇢ learning rate is now 9.94e-04
-Epoch 6/100 — Train: 0.038746, Val: 0.037035 | PSNR: 26.15 dB, SSIM: 0.9617
-⇢ learning rate is now 9.91e-04
-Epoch 7/100 — Train: 0.039081, Val: 0.038448 | PSNR: 25.87 dB, SSIM: 0.9604
-⇢ learning rate is now 9.88e-04
-Epoch 8/100 — Train: 0.039004, Val: 0.036504 | PSNR: 26.55 dB, SSIM: 0.9621
-⇢ learning rate is now 9.84e-04
-Epoch 9/100 — Train: 0.038241, Val: 0.037293 | PSNR: 25.93 dB, SSIM: 0.9618
-⇢ learning rate is now 9.80e-04
-Epoch 10/100 — Train: 0.037522, Val: 0.037810 | PSNR: 26.24 dB, SSIM: 0.9606
-⇢ learning rate is now 9.76e-04
-Epoch 11/100 — Train: 0.037723, Val: 0.039305 | PSNR: 26.28 dB, SSIM: 0.9589
-⇢ learning rate is now 9.70e-04
-Epoch 12/100 — Train: 0.037260, Val: 0.037003 | PSNR: 26.34 dB, SSIM: 0.9616
-⇢ learning rate is now 9.65e-04
-Epoch 13/100 — Train: 0.037244, Val: 0.035938 | PSNR: 26.43 dB, SSIM: 0.9628
-⇢ learning rate is now 9.59e-04
-Epoch 14/100 — Train: 0.037209, Val: 0.038334 | PSNR: 26.00 dB, SSIM: 0.9608
-⇢ learning rate is now 9.52e-04
-Epoch 15/100 — Train: 0.036824, Val: 0.037905 | PSNR: 25.91 dB, SSIM: 0.9612
-⇢ learning rate is now 9.46e-04
-Epoch 16/100 — Train: 0.036418, Val: 0.035645 | PSNR: 26.47 dB, SSIM: 0.9631
-⇢ learning rate is now 9.38e-04
-Epoch 17/100 — Train: 0.036864, Val: 0.036056 | PSNR: 26.69 dB, SSIM: 0.9625
-⇢ learning rate is now 9.30e-04
-Epoch 18/100 — Train: 0.035112, Val: 0.035630 | PSNR: 26.80 dB, SSIM: 0.9628
-⇢ learning rate is now 9.22e-04
-Epoch 19/100 — Train: 0.035272, Val: 0.035873 | PSNR: 26.87 dB, SSIM: 0.9624
-⇢ learning rate is now 9.14e-04
-Epoch 20/100 — Train: 0.035633, Val: 0.033649 | PSNR: 26.89 dB, SSIM: 0.9653
-⇢ learning rate is now 9.05e-04
-Epoch 21/100 — Train: 0.036017, Val: 0.037309 | PSNR: 26.26 dB, SSIM: 0.9617
-⇢ learning rate is now 8.95e-04
-Epoch 22/100 — Train: 0.034605, Val: 0.039228 | PSNR: 25.81 dB, SSIM: 0.9599
-⇢ learning rate is now 8.85e-04
-Epoch 23/100 — Train: 0.036113, Val: 0.037895 | PSNR: 26.55 dB, SSIM: 0.9603
-⇢ learning rate is now 8.75e-04
-Epoch 24/100 — Train: 0.034805, Val: 0.034874 | PSNR: 27.07 dB, SSIM: 0.9636
-⇢ learning rate is now 8.65e-04
-Epoch 25/100 — Train: 0.035383, Val: 0.035542 | PSNR: 26.87 dB, SSIM: 0.9630
-⇢ learning rate is now 8.54e-04
-Epoch 26/100 — Train: 0.035628, Val: 0.034559 | PSNR: 27.00 dB, SSIM: 0.9639
-⇢ learning rate is now 8.42e-04
-Epoch 27/100 — Train: 0.035885, Val: 0.036693 | PSNR: 26.70 dB, SSIM: 0.9617
-⇢ learning rate is now 8.31e-04
-Epoch 28/100 — Train: 0.034570, Val: 0.035179 | PSNR: 26.82 dB, SSIM: 0.9635
-⇢ learning rate is now 8.19e-04
-Epoch 29/100 — Train: 0.034833, Val: 0.035225 | PSNR: 27.20 dB, SSIM: 0.9632
-⇢ learning rate is now 8.07e-04
-Epoch 30/100 — Train: 0.034494, Val: 0.035945 | PSNR: 26.89 dB, SSIM: 0.9624
-⇢ learning rate is now 7.94e-04
-Early stopping at epoch 30
+Epoch 2/100 — Train: 0.041537, Val: 0.038031 | PSNR: 25.35 dB, SSIM: 0.9609
+⇢ learning rate is now 1.00e-03
+Epoch 3/100 — Train: 0.040008, Val: 0.037822 | PSNR: 26.04 dB, SSIM: 0.9590
+⇢ learning rate is now 1.00e-03
+Epoch 4/100 — Train: 0.038702, Val: 0.037420 | PSNR: 26.40 dB, SSIM: 0.9599
+⇢ learning rate is now 1.00e-03
+Epoch 5/100 — Train: 0.038701, Val: 0.034596 | PSNR: 26.59 dB, SSIM: 0.9634
+⇢ learning rate is now 1.00e-03
+Epoch 6/100 — Train: 0.037549, Val: 0.038102 | PSNR: 25.65 dB, SSIM: 0.9597
+⇢ learning rate is now 1.00e-03
+Epoch 7/100 — Train: 0.037185, Val: 0.036754 | PSNR: 26.00 dB, SSIM: 0.9604
+⇢ learning rate is now 1.00e-03
+Epoch 8/100 — Train: 0.036754, Val: 0.035383 | PSNR: 26.42 dB, SSIM: 0.9617
+⇢ learning rate is now 1.00e-03
+Epoch 9/100 — Train: 0.036185, Val: 0.036602 | PSNR: 26.42 dB, SSIM: 0.9605
+⇢ learning rate is now 1.00e-03
+Epoch 10/100 — Train: 0.037237, Val: 0.039192 | PSNR: 25.67 dB, SSIM: 0.9578
+⇢ learning rate is now 1.00e-03
+Epoch 11/100 — Train: 0.036259, Val: 0.032500 | PSNR: 27.04 dB, SSIM: 0.9660
+⇢ learning rate is now 1.00e-03
+Epoch 12/100 — Train: 0.035348, Val: 0.034795 | PSNR: 26.67 dB, SSIM: 0.9623
+⇢ learning rate is now 1.00e-03
+Epoch 13/100 — Train: 0.036352, Val: 0.033519 | PSNR: 27.01 dB, SSIM: 0.9642
+⇢ learning rate is now 1.00e-03
+Epoch 14/100 — Train: 0.034801, Val: 0.033828 | PSNR: 26.81 dB, SSIM: 0.9633
+⇢ learning rate is now 1.00e-03
+Epoch 15/100 — Train: 0.036179, Val: 0.035234 | PSNR: 26.39 dB, SSIM: 0.9632
+⇢ learning rate is now 1.00e-03
+Epoch 16/100 — Train: 0.035172, Val: 0.034585 | PSNR: 26.84 dB, SSIM: 0.9626
+⇢ learning rate is now 1.00e-03
+Epoch 17/100 — Train: 0.035227, Val: 0.035109 | PSNR: 26.36 dB, SSIM: 0.9628
+⇢ learning rate is now 5.00e-04
+Epoch 18/100 — Train: 0.032727, Val: 0.031941 | PSNR: 27.30 dB, SSIM: 0.9648
+⇢ learning rate is now 5.00e-04
+Epoch 19/100 — Train: 0.033382, Val: 0.033229 | PSNR: 27.38 dB, SSIM: 0.9631
+⇢ learning rate is now 5.00e-04
+Epoch 20/100 — Train: 0.032762, Val: 0.033346 | PSNR: 27.09 dB, SSIM: 0.9633
+⇢ learning rate is now 5.00e-04
+Epoch 21/100 — Train: 0.033008, Val: 0.035088 | PSNR: 26.90 dB, SSIM: 0.9614
+⇢ learning rate is now 5.00e-04
+Epoch 22/100 — Train: 0.033256, Val: 0.032208 | PSNR: 27.49 dB, SSIM: 0.9651
+⇢ learning rate is now 5.00e-04
+Epoch 23/100 — Train: 0.032435, Val: 0.032180 | PSNR: 27.47 dB, SSIM: 0.9643
+⇢ learning rate is now 5.00e-04
+Epoch 24/100 — Train: 0.032692, Val: 0.031705 | PSNR: 27.49 dB, SSIM: 0.9652
+⇢ learning rate is now 5.00e-04
+Epoch 25/100 — Train: 0.032614, Val: 0.032707 | PSNR: 27.19 dB, SSIM: 0.9638
+⇢ learning rate is now 5.00e-04
+Epoch 26/100 — Train: 0.033212, Val: 0.033320 | PSNR: 27.17 dB, SSIM: 0.9630
+⇢ learning rate is now 5.00e-04
+Epoch 27/100 — Train: 0.033286, Val: 0.032382 | PSNR: 27.26 dB, SSIM: 0.9644
+⇢ learning rate is now 5.00e-04
+Epoch 28/100 — Train: 0.032897, Val: 0.032559 | PSNR: 27.46 dB, SSIM: 0.9640
+⇢ learning rate is now 5.00e-04
+Epoch 29/100 — Train: 0.033046, Val: 0.031493 | PSNR: 27.71 dB, SSIM: 0.9653
+⇢ learning rate is now 5.00e-04
+Epoch 30/100 — Train: 0.032713, Val: 0.033343 | PSNR: 26.96 dB, SSIM: 0.9637
+⇢ learning rate is now 5.00e-04
+Epoch 31/100 — Train: 0.032209, Val: 0.032660 | PSNR: 27.23 dB, SSIM: 0.9643
+⇢ learning rate is now 5.00e-04
+Epoch 32/100 — Train: 0.032829, Val: 0.030702 | PSNR: 27.80 dB, SSIM: 0.9662
+⇢ learning rate is now 5.00e-04
+Epoch 33/100 — Train: 0.032431, Val: 0.031721 | PSNR: 27.66 dB, SSIM: 0.9652
+⇢ learning rate is now 5.00e-04
+Epoch 34/100 — Train: 0.033307, Val: 0.033494 | PSNR: 27.15 dB, SSIM: 0.9626
+⇢ learning rate is now 5.00e-04
+Epoch 35/100 — Train: 0.032185, Val: 0.033000 | PSNR: 27.49 dB, SSIM: 0.9634
+⇢ learning rate is now 5.00e-04
+Epoch 36/100 — Train: 0.032509, Val: 0.032305 | PSNR: 27.26 dB, SSIM: 0.9647
+⇢ learning rate is now 5.00e-04
+Epoch 37/100 — Train: 0.032484, Val: 0.034164 | PSNR: 27.03 dB, SSIM: 0.9618
+⇢ learning rate is now 5.00e-04
+Epoch 38/100 — Train: 0.032707, Val: 0.031353 | PSNR: 27.72 dB, SSIM: 0.9652
+⇢ learning rate is now 2.50e-04
+Epoch 39/100 — Train: 0.031883, Val: 0.029929 | PSNR: 28.05 dB, SSIM: 0.9669
+⇢ learning rate is now 2.50e-04
+Epoch 40/100 — Train: 0.031194, Val: 0.030143 | PSNR: 27.90 dB, SSIM: 0.9666
+⇢ learning rate is now 2.50e-04
+Epoch 41/100 — Train: 0.031971, Val: 0.031979 | PSNR: 27.34 dB, SSIM: 0.9647
+⇢ learning rate is now 2.50e-04
+Epoch 42/100 — Train: 0.031386, Val: 0.031149 | PSNR: 27.55 dB, SSIM: 0.9653
+⇢ learning rate is now 2.50e-04
+Epoch 43/100 — Train: 0.031495, Val: 0.031488 | PSNR: 27.84 dB, SSIM: 0.9648
+⇢ learning rate is now 2.50e-04
+Epoch 44/100 — Train: 0.031768, Val: 0.031663 | PSNR: 27.72 dB, SSIM: 0.9645
+⇢ learning rate is now 2.50e-04
+Epoch 45/100 — Train: 0.030951, Val: 0.033117 | PSNR: 27.28 dB, SSIM: 0.9626
+⇢ learning rate is now 1.25e-04
+Epoch 46/100 — Train: 0.031042, Val: 0.031517 | PSNR: 27.63 dB, SSIM: 0.9650
+⇢ learning rate is now 1.25e-04
+Epoch 47/100 — Train: 0.030765, Val: 0.032136 | PSNR: 27.74 dB, SSIM: 0.9639
+⇢ learning rate is now 1.25e-04
+Epoch 48/100 — Train: 0.030754, Val: 0.031231 | PSNR: 27.85 dB, SSIM: 0.9651
+⇢ learning rate is now 1.25e-04
+Epoch 49/100 — Train: 0.030707, Val: 0.030723 | PSNR: 27.87 dB, SSIM: 0.9654
+⇢ learning rate is now 1.25e-04
+Early stopping at epoch 49
 Saved training curves to /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/plots/mr_lkv/training_curves.png
 Saved reconstructed sinograms to /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/plots/mr_lkv/recon_sino
-Final Test — Loss: 0.032729, PSNR: 27.13 dB, SSIM: 0.9661
+Final Test — Loss: 0.029623, PSNR: 28.25 dB, SSIM: 0.9670
 === JOB_STATISTICS ===
-=== current date     : Thu Nov  6 09:46:14 PM CET 2025
-= Job-ID             : 1307538 on tinygpu
+=== current date     : Mon Nov 10 02:10:47 AM CET 2025
+= Job-ID             : 1309226 on tinygpu
 = Job-Name           : MR_LKVV2
 = Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
 = Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
 = Queue/Partition    : rtx3080
 = Slurm account      : iwi5 with QOS=normal
 = Requested resources:  for 1-00:00:00
-= Elapsed runtime    : 00:21:18
-= Total RAM usage    : 15.1 GiB of requested  GiB (%)   
-= Node list          : tg081
-= Subm/Elig/Start/End: 2025-11-06T21:24:55 / 2025-11-06T21:24:55 / 2025-11-06T21:24:56 / 2025-11-06T21:46:14
+= Elapsed runtime    : 01:06:11
+= Total RAM usage    : 15.3 GiB of requested  GiB (%)   
+= Node list          : tg083
+= Subm/Elig/Start/End: 2025-11-10T01:04:34 / 2025-11-10T01:04:34 / 2025-11-10T01:04:35 / 2025-11-10T02:10:46
 ======================
 === Quota infos ======
     Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
-    /home/hpc              18.5G   104.9G   209.7G        N/A  21,806      500K   1,000K        N/A    
-    /home/woody            32.2G  1000.0G  1500.0G        N/A     158K   5,000K   7,500K        N/A    
-    /home/vault           366.3G  1048.6G  2097.2G        N/A     196K     200K     400K        N/A    
+    /home/woody            32.3G  1000.0G  1500.0G        N/A     160K   5,000K   7,500K        N/A    
+    /home/hpc              19.1G   104.9G   209.7G        N/A  24,550      500K   1,000K        N/A    
 ======================
 === GPU utilization ==
 gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
-NVIDIA GeForce RTX 3080, 00000000:DB:00.0, 3870565, 76 %, 4 %, 738 MiB, 1250082 ms
+NVIDIA GeForce RTX 3080, 00000000:DB:00.0, 2251191, 91 %, 3 %, 768 MiB, 3964128 ms
