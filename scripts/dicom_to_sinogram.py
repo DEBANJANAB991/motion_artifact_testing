@@ -25,7 +25,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from diffct.differentiable import FanProjectorFunction
 
-MAX_SAMPLES = 10000  
+MAX_SAMPLES = 20000  
 
 
 def dicom_to_hu(path: Path) -> np.ndarray:
