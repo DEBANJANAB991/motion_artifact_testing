@@ -22,9 +22,6 @@ Sat Nov 15 19:06:54 2025
 +-----------------------------------------------------------------------------------------+
 ### Finished TaskPrologue
 
-TRY: /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
-SwinIR: True
-basicsr: True
 Starting training with model=mr_lkv…
 → Checkpoints will be saved to: /home/vault/iwi5/iwi5293h/models/mr_lkv
 Model parameters: 8,040,127
