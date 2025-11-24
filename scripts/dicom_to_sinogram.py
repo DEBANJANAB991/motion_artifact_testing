@@ -1,15 +1,20 @@
+#!/usr/bin/env python3
 import os
 import pydicom
 import numpy as np
 import torch
 from tqdm import tqdm
 from pathlib import Path
+
 from diffct.differentiable import FanProjectorFunction
 from config import DATASET_PATH, CLEAN_SINOGRAM_ROOT, MAX_SAMPLES, DET_COUNT_FACTOR
 
-# ------------------------------------------
-# Load DICOM and convert to HU
-# ------------------------------------------
+# Physical constant (same as round-trip)
+MU_WATER = 0.019  # 1/mm
+
+# ---------------------------------------------------
+# Load DICOM and extract HU + geometry
+# ---------------------------------------------------
 def dicom_to_hu_and_geometry(path: Path):
     ds = pydicom.dcmread(str(path), force=True)
 
@@ -18,32 +23,45 @@ def dicom_to_hu_and_geometry(path: Path):
     slope = float(getattr(ds, "RescaleSlope", 1.0))
     inter = float(getattr(ds, "RescaleIntercept", 0.0))
     hu = img * slope + inter
+   # hu = np.clip(hu, -1000, 2000)
+    hu = np.clip(hu, -1024, 3071)  # full CT dynamic range
 
     px = ds.get("PixelSpacing", None)
     if px is None:
         raise ValueError("Missing PixelSpacing")
-    pixel_size = float(px[0])  # mm
 
-    SDD = float(getattr(ds, "DistanceSourceToDetector", 946.746))  # mm
-    SAD = float(getattr(ds, "DistanceSourceToPatient", 538.52))   # mm
+    # IMPORTANT — maintain orientation consistency
+    pixel_spacing_H = float(px[0])  # row spacing
+    pixel_spacing_W = float(px[1])  # column spacing
 
-    return hu.astype(np.float32), pixel_size, SDD, SAD
+    # Header geometry or fallback defaults
+    SDD = float(getattr(ds, "DistanceSourceToDetector", 1085.6))  # mm
+    SAD = float(getattr(ds, "DistanceSourceToPatient", 595.0))   # mm
 
 
-# ------------------------------------------
-# Create sinogram using SAME parameters as working round-trip
-# ------------------------------------------
+    return hu.astype(np.float32), pixel_spacing_H, pixel_spacing_W, SDD, SAD
+
+
+# ---------------------------------------------------
+# Fan-beam forward projection (same as round-trip)
+# ---------------------------------------------------
 @torch.no_grad()
-def hu_to_sinogram(hu: np.ndarray, angles: torch.Tensor, pixel_size, SDD, SAD):
+def hu_to_sinogram_fanbeam(hu, angles, pixel_spacing_H, pixel_spacing_W, SDD, SAD):
     H, W = hu.shape
     device = angles.device
 
-    # detector count same as in working code
+    # SAME detector count logic as round-trip
     n_detectors = max(int(W * DET_COUNT_FACTOR), W)
-    det_spacing = pixel_size  # mm, consistent with round-trip
 
-    phantom = torch.from_numpy(hu).to(device=device, dtype=torch.float32)
+    # SAME detector spacing as round-trip
+    det_spacing = pixel_spacing_W  # use W spacing
 
+    # HU → mu (same formula)
+    mu_img = MU_WATER * (1.0 + (hu / 1000.0))
+
+    phantom = torch.from_numpy(mu_img.astype(np.float32)).to(device)
+
+    # FanProjectorFunction signature is identical to round-trip
     sino = FanProjectorFunction.apply(
         phantom,
         angles,
@@ -51,21 +69,23 @@ def hu_to_sinogram(hu: np.ndarray, angles: torch.Tensor, pixel_size, SDD, SAD):
         float(det_spacing),
         float(SDD),
         float(SAD),
-        float(pixel_size),
+        float(pixel_spacing_H),  # row spacing here
     )
 
+    # Return raw sinogram (no filtering here)
     return sino.cpu().numpy()
 
 
-# ------------------------------------------
+# ---------------------------------------------------
 # Main processing loop
-# ------------------------------------------
+# ---------------------------------------------------
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # SAME angle sampling as round-trip
     angles = torch.linspace(0, 2*np.pi, 360, device=device)[:-1]
 
     CLEAN_SINOGRAM_ROOT.mkdir(parents=True, exist_ok=True)
-
     processed = 0
 
     for root, _, files in os.walk(DATASET_PATH):
@@ -87,10 +107,17 @@ def main():
                 continue
 
             # Load HU + geometry
-            hu, pixel_size, SDD, SAD = dicom_to_hu_and_geometry(dcm_path)
+            hu, pixel_spacing_H, pixel_spacing_W, SDD, SAD = dicom_to_hu_and_geometry(dcm_path)
 
-            # Generate sinogram
-            sino = hu_to_sinogram(hu, angles, pixel_size, SDD, SAD)
+            # Fan-beam sinogram
+            sino = hu_to_sinogram_fanbeam(
+                hu,
+                angles,
+                pixel_spacing_H,
+                pixel_spacing_W,
+                SDD,
+                SAD
+            )
 
             np.save(out_path, sino)
             processed += 1
