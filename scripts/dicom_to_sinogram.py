@@ -1,72 +1,74 @@
-#!/usr/bin/env python3
-"""
-Converts files from volume domain to projection domain
-"""
-
-import os, sys
-from pathlib import Path
-import numpy as np
+import os
 import pydicom
+import numpy as np
 import torch
 from tqdm import tqdm
-
-from config import (
-    DATASET_PATH,
-    CLEAN_SINOGRAM_ROOT,
-    N_VIEWS,
-    N_DET,
-    DET_SPACING,
-    SRC_ISO_PIXELS,
-    SRC_DET_PIXELS,
-    STEP_SIZE,
-)
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from pathlib import Path
 from diffct.differentiable import FanProjectorFunction
+from config import DATASET_PATH, CLEAN_SINOGRAM_ROOT, MAX_SAMPLES, DET_COUNT_FACTOR
 
-MAX_SAMPLES = 20000  
+# ------------------------------------------
+# Load DICOM and convert to HU
+# ------------------------------------------
+def dicom_to_hu_and_geometry(path: Path):
+    ds = pydicom.dcmread(str(path), force=True)
+
+    img = ds.pixel_array.astype(np.float32)
+
+    slope = float(getattr(ds, "RescaleSlope", 1.0))
+    inter = float(getattr(ds, "RescaleIntercept", 0.0))
+    hu = img * slope + inter
+
+    px = ds.get("PixelSpacing", None)
+    if px is None:
+        raise ValueError("Missing PixelSpacing")
+    pixel_size = float(px[0])  # mm
+
+    SDD = float(getattr(ds, "DistanceSourceToDetector", 946.746))  # mm
+    SAD = float(getattr(ds, "DistanceSourceToPatient", 538.52))   # mm
+
+    return hu.astype(np.float32), pixel_size, SDD, SAD
 
 
-def dicom_to_hu(path: Path) -> np.ndarray:
-    try:
-        ds  = pydicom.dcmread(str(path), force=True)
-        img = ds.pixel_array.astype(np.float32)
-        slope = float(getattr(ds, "RescaleSlope", 1.0))
-        inter = float(getattr(ds, "RescaleIntercept", 0.0))
-        return img * slope + inter
-    except Exception as e:
-        print(f"[ERROR] Could not read {path}: {e}")
-        return None
-
-
+# ------------------------------------------
+# Create sinogram using SAME parameters as working round-trip
+# ------------------------------------------
 @torch.no_grad()
-def slice_to_sino(img: np.ndarray, angles: torch.Tensor) -> np.ndarray:
-    phantom = torch.from_numpy(img).to(angles.device)
+def hu_to_sinogram(hu: np.ndarray, angles: torch.Tensor, pixel_size, SDD, SAD):
+    H, W = hu.shape
+    device = angles.device
+
+    # detector count same as in working code
+    n_detectors = max(int(W * DET_COUNT_FACTOR), W)
+    det_spacing = pixel_size  # mm, consistent with round-trip
+
+    phantom = torch.from_numpy(hu).to(device=device, dtype=torch.float32)
+
     sino = FanProjectorFunction.apply(
         phantom,
         angles,
-        N_DET, DET_SPACING,
-        STEP_SIZE,
-        SRC_DET_PIXELS, SRC_ISO_PIXELS
+        int(n_detectors),
+        float(det_spacing),
+        float(SDD),
+        float(SAD),
+        float(pixel_size),
     )
+
     return sino.cpu().numpy()
 
 
-def main() -> None:
-    if not torch.cuda.is_available():
-        sys.exit("CUDA GPU not available - abort.")
+# ------------------------------------------
+# Main processing loop
+# ------------------------------------------
+def main():
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    angles = torch.linspace(0, 2*np.pi, 360, device=device)[:-1]
 
-    device = torch.device("cuda")
-    angles = torch.linspace(0, 2*np.pi, N_VIEWS,
-                             device=device, dtype=torch.float32)
+    CLEAN_SINOGRAM_ROOT.mkdir(parents=True, exist_ok=True)
 
     processed = 0
-    # Walk the DICOM tree
-    for root, _, files in os.walk(DATASET_PATH):
-        if processed >= MAX_SAMPLES:
-            break
 
+    for root, _, files in os.walk(DATASET_PATH):
         dcm_files = [f for f in files if f.lower().endswith(".dcm")]
         if not dcm_files:
             continue
@@ -74,27 +76,26 @@ def main() -> None:
         out_dir = CLEAN_SINOGRAM_ROOT / Path(root).relative_to(DATASET_PATH)
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        # Process each slice, but stop at MAX_SAMPLES
-        for f in tqdm(dcm_files, desc=f"Converting ({processed}/{MAX_SAMPLES})"):
+        for filename in tqdm(dcm_files, desc=f"Converting ({processed}/{MAX_SAMPLES})"):
             if processed >= MAX_SAMPLES:
                 break
 
-            src = Path(root) / f
-            dst = out_dir / (f.replace(".dcm", ".npy"))
-            if dst.exists():
+            dcm_path = Path(root) / filename
+            out_path = out_dir / (filename.replace(".dcm", ".npy"))
+
+            if out_path.exists():
                 continue
 
-            img = dicom_to_hu(src)
-            if img is None:
-                continue
+            # Load HU + geometry
+            hu, pixel_size, SDD, SAD = dicom_to_hu_and_geometry(dcm_path)
 
-            sino = slice_to_sino(img, angles)
-            np.save(dst, sino)
+            # Generate sinogram
+            sino = hu_to_sinogram(hu, angles, pixel_size, SDD, SAD)
+
+            np.save(out_path, sino)
             processed += 1
 
-      
-
-    print(f"✅ Finished: wrote {processed} sinograms (limit {MAX_SAMPLES}) to {CLEAN_SINOGRAM_ROOT}")
+    print(f"\n✅ Wrote {processed} sinograms to {CLEAN_SINOGRAM_ROOT}")
 
 
 if __name__ == "__main__":
