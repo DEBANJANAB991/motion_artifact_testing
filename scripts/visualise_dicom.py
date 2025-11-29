@@ -54,7 +54,7 @@ def fan_beam_preweight(det_u, du, sid):
     return torch.from_numpy(weight).float()  # shape (det_u,)
 
 def round_trip_fixed(dataset_root,
-                     n_views=360,
+                     n_views=360, 
                      # recommended CQ500-ish defaults (change if you know exact scanner)
                      n_detectors=888,
                      det_spacing=1.285,   # mm
