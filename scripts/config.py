@@ -12,7 +12,8 @@ DATASET_PATH   = Path("/home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bk
 #ARTIFACT_ROOT = Path("/home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/art_sinograms") #name to be changed back to ARTIFACT_ROOT 
 CLEAN_SINOGRAM_ROOT=Path("/home/woody/iwi5/iwi5293h/clean_sinograms")
 ARTIFACT_ROOT=Path("/home/woody/iwi5/iwi5293h/art_sinograms")
-
+SUBSET_ROOT = Path("/home/woody/iwi5/iwi5293h/clean_sinograms_test")
+ARTIFACT_TEST_ROOT = Path("/home/woody/iwi5/iwi5293h/art_sinograms_test")
 
  
 
@@ -28,14 +29,19 @@ RECON_ROOT     = DATASET_PATH.parent / "recon"
 # ------------------------------------------------------------------
 N_VIEWS         = 360
 N_DET           = 512
-DET_SPACING     = 1.0
-SRC_ISO_PIXELS  = 500.0   # source-to-iso
-SRC_DET_PIXELS  = 1000.0  # source-to-detector
 STEP_SIZE       = 0.5
+MAX_SAMPLES=20000
+MAX_SAMPLES_TEST=100
+SID = 560.0           # Source → Isocenter (mm)
+SDD = 1100.0          # Source → Detector (mm)
+DET_SPACING = 1.2     # Detector spacing (mm)
+DET_COUNT = 736       # Number of detector elements
+VOXEL_SPACING = 1.0   # MUST remain 1.0 for diffct
 # Training hyperparameters
 # ------------------------------------------------------------------
 # Total number of epochs
 EPOCHS = 100
+MU_WATER = 0.019 
 
 # Batch size per GPU
 BATCH_SIZE = 16

@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/train_test_split.py", line 237, in <module>
-    main()
-  File "/home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/train_test_split.py", line 151, in main
-    model = MR_LKV(in_channels=1,
-TypeError: MR_LKV.__init__() got an unexpected keyword argument 'in_channels'

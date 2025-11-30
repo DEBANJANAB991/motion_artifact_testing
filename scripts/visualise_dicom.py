@@ -5,10 +5,19 @@ import pydicom
 import numpy as np
 import matplotlib.pyplot as plt
 from config import DATASET_PATH
-# original operators
 from diffct.differentiable import FanProjectorFunction, FanBackprojectorFunction
 
-MU_WATER = 0.019  # 1/mm
+# ---------------------------------------------------------
+# SCANNER GEOMETRY (FROM FAST SEARCH RESULTS)
+# ---------------------------------------------------------
+SID = 560.0           # Source → Isocenter (mm)
+SDD = 1100.0          # Source → Detector (mm)
+DET_SPACING = 1.2     # Detector spacing (mm)
+DET_COUNT = 736       # Number of detector elements
+VOXEL_SPACING = 1.0   # MUST remain 1.0 for diffct
+# ---------------------------------------------------------
+
+MU_WATER = 0.019      # 1/mm (standard water attenuation)
 
 def find_first_dicom(root):
     for dirpath, _, files in os.walk(root):
@@ -19,180 +28,136 @@ def find_first_dicom(root):
 
 def load_dicom(path):
     ds = pydicom.dcmread(path, force=True)
+    px = ds.PixelSpacing
     arr = ds.pixel_array.astype(np.float32)
-    slope = float(getattr(ds, "RescaleSlope", 1.0))
-    intercept = float(getattr(ds, "RescaleIntercept", 0.0))
-    hu = arr * slope + intercept
-    px = ds.get("PixelSpacing", None)
-    if px is None:
-        raise ValueError("Missing PixelSpacing in DICOM")
-    px = [float(px[0]), float(px[1])]
-    sdd = float(getattr(ds, "DistanceSourceToDetector", 0.0))
-    sad = float(getattr(ds, "DistanceSourceToPatient", 0.0))
-    return hu, px, ds, sdd, sad
+    hu = arr * float(getattr(ds,"RescaleSlope",1.0)) + float(getattr(ds,"RescaleIntercept",0.0))
+    return hu, [float(px[0]), float(px[1])], ds
 
-# ramp+hann filter (expects sino shape (n_views, n_det))
-def ramp_hann_filter(sino_t):
-    device = sino_t.device
-    n_det = sino_t.shape[-1]
-    freqs = torch.fft.rfftfreq(n_det, d=1.0, device=device, dtype=torch.float32)
+def ramp_hann_filter(sino):
+    device = sino.device
+    n_det = sino.shape[-1]
+
+    freqs = torch.fft.rfftfreq(n_det, d=1.0, device=device)
     ramp = torch.abs(freqs)
-    f_max = freqs.max() if freqs.numel() > 0 else 0.5
-    window = 0.5 * (1.0 + torch.cos(math.pi * freqs / f_max)) if f_max != 0 else torch.ones_like(ramp)
-    filt = ramp * window
-    sino_fft = torch.fft.rfft(sino_t, dim=-1)
-    sino_fft = sino_fft * filt.unsqueeze(0)
-    sino_filt = torch.fft.irfft(sino_fft, n=n_det, dim=-1)
-    return sino_filt
 
-# Optional: compute fan-beam pre-weight cos(gamma)
-def fan_beam_preweight(det_u, du, sid):
-    # detector indices centered at 0
-    u = (np.arange(det_u) - (det_u - 1) / 2.0) * du  # mm from center
-    gamma = np.arctan(u / sid)   # fan angle per detector column
-    weight = np.cos(gamma).astype(np.float32)      # cos(gamma)
-    return torch.from_numpy(weight).float()  # shape (det_u,)
+    hann = 0.5 * (1.0 + torch.cos(math.pi * freqs / (freqs.max() + 1e-8)))
+    filt = ramp * hann
 
-def round_trip_fixed(dataset_root,
-                     n_views=360, 
-                     # recommended CQ500-ish defaults (change if you know exact scanner)
-                     n_detectors=888,
-                     det_spacing=1.285,   # mm
-                     default_SAD=595.0,   # mm (SAD ~ source->isocenter)
-                     default_SDD=1085.6,  # mm (source->detector)
-                     apply_fan_weight=True):
+    S = torch.fft.rfft(sino, dim=-1)
+    S = S * filt.unsqueeze(0)
+
+    return torch.fft.irfft(S, n_det, dim=-1)
+
+def run_round_trip(dataset_root, n_views=720):
+
+    # ------------------- Load clean CT ---------------------
     dcm_path = find_first_dicom(dataset_root)
     if dcm_path is None:
-        raise FileNotFoundError(f"No DICOM found under {dataset_root!r}")
-    print("Using DICOM:", dcm_path)
+        raise RuntimeError("No DICOM found!")
+    print("Using:", dcm_path)
 
-    hu, px_spacing, ds, sdd_hdr, sad_hdr = load_dicom(dcm_path)
-    H, W = hu.shape
-    pixel_spacing_H = float(px_spacing[0])
-    pixel_spacing_W = float(px_spacing[1])
-    print(f"Image size: {H}x{W}   pixel spacing H={pixel_spacing_H} W={pixel_spacing_W}")
-
-    # Use header or defaults
-    SDD = sdd_hdr if sdd_hdr and sdd_hdr > 1e-3 else default_SDD
-    SAD = sad_hdr if sad_hdr and sad_hdr > 1e-3 else default_SAD
-    print(f"Using SDD={SDD:.3f} mm, SAD={SAD:.3f} mm")
-
-    # Clip HU -> avoid outliers causing large mu values
+    hu, px, ds = load_dicom(dcm_path)
     hu = np.clip(hu, -1000, 2000)
+    H, W = hu.shape
 
-    # HU -> mu (1/mm)
-    mu_img = MU_WATER * (1.0 + (hu / 1000.0))
-    img_t = torch.from_numpy(mu_img.astype(np.float32)).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    print("Loaded CT:", H, W, "pixel spacing:", px)
 
-    # Build angles
-    device = img_t.device
-    angles = torch.linspace(0.0, 2.0 * math.pi, n_views+1, dtype=torch.float32, device=device)[:-1]
+    # ------------------- CT → mu ----------------------------
+    mu = MU_WATER * (1.0 + hu / 1000.0)
+    img_t = torch.from_numpy(mu.astype(np.float32)).cuda()
 
-    # Project (fan-beam)
+    # ------------------- Projection Angles ------------------
+    angles = torch.linspace(0, 2*math.pi, n_views+1, device=img_t.device)[:-1]
+
+    # ------------------- Forward Projection ----------------
     with torch.no_grad():
-        sino_t = FanProjectorFunction.apply(
-            img_t,
-            angles,
-            int(n_detectors),
-            float(det_spacing),
+        sino = FanProjectorFunction.apply(
+            img_t, angles,
+            int(DET_COUNT),
+            float(DET_SPACING),
             float(SDD),
-            float(SAD),
-            float(pixel_spacing_W)   # IMPORTANT: use pixel_spacing_W (image column spacing)
+            float(SID),
+            float(VOXEL_SPACING)
         )
-    print("Raw sino shape:", sino_t.shape)
-    print("Raw sino stats: min", float(sino_t.min()), "max", float(sino_t.max()), "mean", float(sino_t.mean()))
 
-    # Extract shape: ensure sino shape is (n_views, n_det)
-    # Many projectors return (n_views, n_det) or (n_views, n_det, ?) — adapt if needed
-    if sino_t.ndim == 3:
-        # some implementations return (views, det_v, det_u). If so, pick central det_v row:
-        # assume shape (views, det_v, det_u)
-        sino2d = sino_t[:, sino_t.shape[1] // 2, :].contiguous()
-    else:
-        sino2d = sino_t.contiguous()
+    # If projector returns (views, detector_v, detector_u)
+    if sino.ndim == 3:
+        sino = sino[:, sino.shape[1]//2, :].contiguous()
 
-    print("Using sinogram shape for FBP:", sino2d.shape)
+    print("Sinogram shape:", sino.shape)
 
-    # Optional fan-beam pre-weight (cos gamma)
-    if apply_fan_weight:
-        weight = fan_beam_preweight(sino2d.shape[1], det_spacing, SAD)  # shape (det_u,)
-        weight = weight.to(device)
-        sino2d = sino2d * weight.unsqueeze(0)
+    # ------------------- Filter Sinogram -------------------
+    sino_filt = ramp_hann_filter(sino)
 
-    # Scale sinogram by detector spacing (convert per-mm integrals -> discrete samples)
-    sino_scaled = sino2d * float(det_spacing)
-
-    print("Sino scaled stats: min", float(sino_scaled.min()), "max", float(sino_scaled.max()), "mean", float(sino_scaled.mean()))
-
-    # Filter
-    sino_filt = ramp_hann_filter(sino_scaled)
-    print("Filtered sino stats: min", float(sino_filt.min()), "max", float(sino_filt.max()), "mean", float(sino_filt.mean()))
-
-    # Backproject
-    # FanBackprojectorFunction signature (sino, angles, det_spacing, H, W, SDD, SAD, pixel_spacing)
+    # ------------------- FBP Reconstruction ----------------
     with torch.no_grad():
-        recon_t = FanBackprojectorFunction.apply(
+        reco = FanBackprojectorFunction.apply(
             sino_filt,
             angles,
-            float(det_spacing),
-            int(H),
-            int(W),
+            float(DET_SPACING),
+            H, W,
             float(SDD),
-            float(SAD),
-            float(pixel_spacing_W)
+            float(SID),
+            float(VOXEL_SPACING)
         )
 
-    print("Raw recon (mu) stats:", float(recon_t.min()), float(recon_t.max()), float(recon_t.mean()))
+    # Correct FBP scaling for fan-beam
+    reco = reco * (math.pi / (2.0 * n_views))
 
-    # Normalize backprojection by number of views
-    recon_t = recon_t / float(n_views)
+    recon_mu = reco.cpu().numpy()
+    recon_hu = 1000.0 * (recon_mu/MU_WATER - 1.0)
 
-    recon_mu = recon_t.cpu().numpy()
-    recon_hu = 1000.0 * (recon_mu / MU_WATER - 1.0)
-    print("Recon HU stats:", recon_hu.min(), recon_hu.max(), recon_hu.mean())
+    # ------------------- Visualization Panels -------------------
 
-    # Display / save images
-    disp_orig = np.clip((hu + 1000.0) / 3000.0, 0.0, 1.0)
-    recon_disp = np.clip((recon_hu + 1000.0) / 3000.0, 0.0, 1.0)
+    # Original CT
+    disp_ct = np.clip((hu + 1000)/3000, 0, 1)
 
-    out = os.path.join(os.getcwd(), "round_trip_fixed.png")
-    plt.figure(figsize=(15,5))
-    plt.subplot(1,3,1); plt.imshow(disp_orig, cmap='gray'); plt.title("Original (scaled HU)"); plt.axis('off')
-    plt.subplot(1,3,2); plt.imshow(sino_filt.cpu().numpy(), cmap='gray', aspect='auto'); plt.title("Filtered sinogram"); plt.xlabel("Detector"); plt.ylabel("View")
-    plt.subplot(1,3,3); plt.imshow(recon_disp, cmap='gray'); plt.title("Reconstruction (HU, FBP)"); plt.axis('off')
-    plt.tight_layout(); plt.savefig(out, dpi=200); plt.close()
+    # Unfiltered sinogram
+    sino_raw = sino.cpu().numpy()
+    sino_raw_disp = (sino_raw - sino_raw.min()) / (sino_raw.max() - sino_raw.min() + 1e-8)
+
+    # Filtered sinogram
+    sino_f = sino_filt.cpu().numpy()
+    sino_f_disp = (sino_f - sino_f.min()) / (sino_f.max() - sino_f.min() + 1e-8)
+
+    # Reconstruction
+    disp_recon = np.clip((recon_hu + 1000)/3000, 0, 1)
+
+    # ------------------- Plot ------------------------
+
+    plt.figure(figsize=(26,6))
+
+    plt.subplot(1,4,1)
+    plt.imshow(disp_ct, cmap='gray')
+    plt.title("Original CT (HU)")
+    plt.axis('off')
+
+    plt.subplot(1,4,2)
+    plt.imshow(sino_raw_disp, cmap='gray', aspect='auto')
+    plt.title("Unfiltered Sinogram")
+    plt.xlabel("Detector")
+    plt.ylabel("View")
+
+    plt.subplot(1,4,3)
+    plt.imshow(sino_f_disp, cmap='gray', aspect='auto')
+    plt.title("Filtered Sinogram")
+    plt.xlabel("Detector")
+    plt.ylabel("View")
+
+    plt.subplot(1,4,4)
+    plt.imshow(disp_recon, cmap='gray')
+    plt.title("Reconstruction (FBP)")
+    plt.axis('off')
+
+    plt.tight_layout()
+    out = "round_trip_final_with_unfiltered.png"
+    plt.savefig(out, dpi=200)
+    plt.close()
+
     print("Saved:", out)
 
-    # Also run a synthetic phantom test to validate pipeline
-    def phantom_test():
-        H_, W_ = H, W
-        phantom = np.zeros((H_, W_), dtype=np.float32)
-        cy, cx = H_//2, W_//2
-        r = int(min(H_, W_) * 0.35)
-        y,x = np.ogrid[:H_, :W_]
-        phantom[(x-cx)**2 + (y-cy)**2 <= r*r] = MU_WATER  # uniform mu circle
-        vol = torch.from_numpy(phantom).to(device).float()
-        with torch.no_grad():
-            s = FanProjectorFunction.apply(vol, angles, int(n_detectors), float(det_spacing), float(SDD), float(SAD), float(pixel_spacing_W))
-        if s.ndim == 3:
-            s2 = s[:, s.shape[1]//2, :].contiguous()
-        else:
-            s2 = s
-        s2 = s2 * float(det_spacing)
-        s2_f = ramp_hann_filter(s2)
-        with torch.no_grad():
-            rvol = FanBackprojectorFunction.apply(s2_f, angles, float(det_spacing), H_, W_, float(SDD), float(SAD), float(pixel_spacing_W))
-        rvol = rvol / float(n_views)
-        return float(s2.min()), float(s2.max()), float(rvol.min()), float(rvol.max())
-    ph_stats = phantom_test()
-    print("Phantom test: sino min/max, reco min/max:", ph_stats)
+    return recon_hu, sino_raw, sino_f
 
-    return {
-        "sino_raw": sino2d.cpu().numpy(),
-        "sino_filtered": sino_filt.cpu().numpy(),
-        "recon_hu": recon_hu,
-        "out_path": out
-    }
 
 if __name__ == "__main__":
-    res = round_trip_fixed(DATASET_PATH)
+    run_round_trip(DATASET_PATH)

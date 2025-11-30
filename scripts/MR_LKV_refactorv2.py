@@ -114,11 +114,12 @@ class MR_LKV(nn.Module):
         self,
         in_ch: int = 1,
         C0: int = 32,
-        depths: Sequence[int] = (1,1,1,1),
-        kernels: Sequence[int] = (31,51,71,91),
+        depths: Sequence[int] = (2,2,3,2),#1,1,1,1
+        kernels: Sequence[int] = (35,55,75,95), #31,51,71,91
         dilations: Sequence[int] = (1,1,1,1),
         depthwise: bool = True,
         norm: str = 'bn',
+        use_decoder: bool = True, #added extra
         **kwargs,
     ):
         super().__init__()

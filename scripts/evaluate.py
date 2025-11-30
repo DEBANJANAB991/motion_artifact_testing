@@ -1,79 +1,92 @@
-import torch
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
+#!/usr/bin/env python3
+import os
 from pathlib import Path
+import numpy as np
+import matplotlib.pyplot as plt
+import cv2
+from matplotlib import gridspec
+from matplotlib.colors import Normalize
+import matplotlib.cm as cm
+from skimage.filters import sobel
 
+# ---------------- paths ----------------
+plots_root = Path(__file__).resolve().parents[0] / "results" / "plots"
+models = [d for d in plots_root.iterdir() if d.is_dir()]
 
-from train_test_split import (
-    SinogramDataset,
-    MR_LKV,
-    TRAIN_FRAC,
-    VAL_FRAC,
-    CLEAN_SINOGRAM_ROOT,
-    ARTIFACT_ROOT,
-    CKPT_DIR,
-    BATCH_SIZE,
-)
-from train_test_split import psnr, ssim 
+# ---------------- helper ----------------
+def load_image(path):
+    img = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+    if img.ndim == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return img.astype(np.float32) / 255.0  # assume images are 0-1 normalized
 
-def evaluate():
-    print("Starting evaluation…", flush=True)
+# ---------------- main ----------------
+for model in models:
+    gt_dir = model / "ground_truth" / "ct_images"
+    art_dir = model / "artifacted" / "ct_images"
+    recon_dir = model / "reconstructed" / "ct_images"
+    comp_dir = model / "comparison"
+    comp_dir.mkdir(exist_ok=True)
 
-   
-    dataset = SinogramDataset(Path(CLEAN_SINOGRAM_ROOT),
-                              Path(ARTIFACT_ROOT))
-    total   = len(dataset)
-    n_train = int(TRAIN_FRAC * total)
-    n_val   = int(VAL_FRAC   * total)
-    n_test  = total - n_train - n_val
+    # match files by stem
+    gt_files = sorted(gt_dir.glob("*_ct.png"))
+    art_files = sorted(art_dir.glob("*_ct.png"))
+    recon_files = sorted(recon_dir.glob("*_ct.png"))
 
-    _, _, test_ds = torch.utils.data.random_split(
-        dataset,
-        [n_train, n_val, n_test],
-        generator=torch.Generator().manual_seed(42)
-    )
-    test_loader = DataLoader(test_ds,
-                             batch_size=BATCH_SIZE,
-                             shuffle=False,
-                             num_workers=0,
-                             pin_memory=True)
+    for gt_path, art_path, recon_path in zip(gt_files, art_files, recon_files):
+        gt = load_image(gt_path)
+        art = load_image(art_path)
+        recon = load_image(recon_path)
 
-    # Loads the best model
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = MR_LKV().to(device)
-    model.load_state_dict(torch.load(Path(CKPT_DIR) / "best_model.pth",
-                                     map_location=device))
-    model.eval()
+        # ---------------- Edge-based improvement ----------------
+        # Compute edges using Sobel filter
+        edges_art = sobel(art)
+        edges_recon = sobel(recon)
+        edge_diff = edges_art - edges_recon  # positive where edges reduced (streaks removed)
+        edge_diff[edge_diff < 0] = 0  # ignore new edges
 
-    # Metrics accumulators
-    total_loss = total_psnr = total_ssim = 0.0
+        # Amplify subtle differences for visibility
+        factor = 10.0
+        edge_diff_amp = np.clip(edge_diff * factor, 0, 1)
 
-    with torch.no_grad():
-        for art, clean in test_loader:
-            art, clean = art.to(device), clean.to(device)
-            pred = model(art)
-            if pred.shape != clean.shape:
-                pred = F.interpolate(pred,
-                                     size=clean.shape[-2:],
-                                     mode='bilinear',
-                                     align_corners=False)
+        # Convert reconstructed image to RGB
+        recon_rgb = cv2.cvtColor((recon * 255).astype(np.uint8), cv2.COLOR_GRAY2BGR)
 
-            loss = F.mse_loss(pred, clean, reduction='mean')
-            total_loss += loss.item() * art.size(0)
-            total_psnr += psnr(pred, clean).item() * art.size(0)
-            total_ssim += ssim(pred, clean).item() * art.size(0)
+        # Apply heatmap
+        heatmap = plt.cm.jet(edge_diff_amp)[:, :, :3]
+        heatmap = (heatmap * 255).astype(np.uint8)
 
-    avg_loss = total_loss / n_test
-    avg_psnr = total_psnr / n_test
-    avg_ssim = total_ssim / n_test
+        # Blend heatmap with reconstructed image
+        alpha = 0.5
+        overlay = cv2.addWeighted(heatmap, alpha, recon_rgb, 1 - alpha, 0)
 
-    print(f"── Test Results ─────────", flush=True)
-    print(f"Loss: {avg_loss:.6f}",    flush=True)
-    print(f"PSNR: {avg_psnr:.2f} dB",  flush=True)
-    print(f"SSIM: {avg_ssim:.4f}",    flush=True)
-    print(f"──────────────────────────", flush=True)
+        # ---------------- Plot 4 panels ----------------
+        fig = plt.figure(figsize=(24, 5))
+        spec = gridspec.GridSpec(1, 5, width_ratios=[1, 1, 1, 1, 0.05], wspace=0.05)
 
+        ax0 = fig.add_subplot(spec[0])
+        ax1 = fig.add_subplot(spec[1])
+        ax2 = fig.add_subplot(spec[2])
+        ax3 = fig.add_subplot(spec[3])
+        cax = fig.add_subplot(spec[4])
 
+        ax0.imshow(gt, cmap='gray'); ax0.set_title("Ground Truth")
+        ax1.imshow(art, cmap='gray'); ax1.set_title("Artifacted")
+        ax2.imshow(recon, cmap='gray'); ax2.set_title("Reconstructed")
+        im = ax3.imshow(overlay); ax3.set_title("Edge-based Improvement")
 
-if __name__ == "__main__":
-    evaluate()
+        # Colorbar for heatmap (0 = no improvement, 1 = max streak removal)
+        norm = Normalize(vmin=0, vmax=1)
+        sm = cm.ScalarMappable(cmap='jet', norm=norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm, cax=cax)
+        cbar.set_label("Edge Reduction Intensity", fontsize=10)
+
+        for ax in [ax0, ax1, ax2, ax3]:
+            ax.axis('off')
+
+        plt.suptitle(gt_path.stem, fontsize=16)
+        out_path = comp_dir / f"{gt_path.stem}_comparison_edge_overlay.png"
+        plt.savefig(out_path, dpi=150, bbox_inches='tight')
+        plt.close()
+        print(f"Saved 4-panel comparison with edge-based overlay: {out_path}")
