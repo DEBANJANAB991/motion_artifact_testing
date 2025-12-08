@@ -1,188 +1,232 @@
 #!/usr/bin/env python3
+"""
+FDK reconstruction (cone-beam) that reads sinogram .npy files and writes PNG images only.
+No .npy reconstructions are saved.
+
+Usage:
+    python fdk_reconstruct_only_png.py
+"""
 import os
+import math
+import json
+from pathlib import Path
+from typing import Tuple
+
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
-from pathlib import Path
 from tqdm import tqdm
-import pydicom
-from scipy import ndimage
+from PIL import Image
 
-from diffct.differentiable import FanBackprojectorFunction
-from config import CLEAN_SINOGRAM_ROOT, DATASET_PATH
+from diffct.differentiable import ConeBackprojectorFunction
+from config import CLEAN_SINOGRAM_ROOT  # folder containing .npy sinograms (and optional .json metadata)
 
-# ---------------------------------------------------------
-# FIXED GEOMETRY (from your geometry search)
-# ---------------------------------------------------------
-SID = 560.0
-SDD = 1100.0
-DET_SPACING = 1.2
-DET_COUNT = 736
-VOXEL_SPACING = 1.0
-MU_WATER = 0.019
+# -------------------------
+# User parameters
+# -------------------------
+SINO_DIR = Path(CLEAN_SINOGRAM_ROOT)
+OUT_ROOT = Path.cwd() / "fdk_reconstructions_png"   # output folder (per-sinogram subfolders)
+OUT_ROOT.mkdir(exist_ok=True)
 
-# ---------------------------------------------------------
-# SETTINGS
-# ---------------------------------------------------------
-NUM_SAMPLES = 40
-OUT_DIR = Path("recon_preview")
-OUT_DIR.mkdir(exist_ok=True)
+MAX_FILES = 10            # number of sinograms to reconstruct (sorted)
+USE_GPU = True            # use GPU if available
+NUM_VIEWS_DEFAULT = 540 #360   # fallback if metadata is missing
+SID_DEFAULT = 530.0
+SDD_DEFAULT = 1095.0 #1086.0
+DU_DEFAULT = 1.0
+DV_DEFAULT = 1.0
+RECO_SHAPE_DEFAULT = 512 #None  # if None -> use DET_V for cubic grid (requires DET_V present)
 
+# -------------------------
+# Helpers
+# -------------------------
+def load_sino_and_meta(path: Path) -> Tuple[np.ndarray, dict]:
+    """Load sinogram .npy and optional .json metadata (same stem)."""
+    sino = np.load(path)
+    meta_path = path.with_suffix(".json")
+    meta = {}
+    if meta_path.exists():
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf8"))
+        except Exception:
+            meta = {}
+    return sino, meta
 
-# ---------------------------------------------------------
-# 1) HEAD CENTER DETECTION + RECENTERING
-# ---------------------------------------------------------
-def detect_head_center(hu, thresh=-300):
+def ramp_filter_windowed(sino: torch.Tensor, cutoff_ratio: float = 0.9) -> torch.Tensor:
     """
-    Detects head region by thresholding (> -300 HU),
-    chooses largest connected component,
-    returns centroid (cy,cx).
+    1D ramp filter along detector-u (dim=1) with Hann window to reduce ringing.
+    sino: (views, det_u, det_v)
     """
-
-    mask = hu > thresh
-    labeled, n = ndimage.label(mask)
-
-    if n == 0:
-        # fallback to center
-        H, W = hu.shape
-        return H//2, W//2
-
-    counts = np.bincount(labeled.ravel())
-    counts[0] = 0
-    largest = counts.argmax()
-    comp = (labeled == largest)
-
-    ys, xs = np.nonzero(comp)
-    if len(ys) == 0:
-        H, W = hu.shape
-        return H//2, W//2
-
-    cy = int(np.round(ys.mean()))
-    cx = int(np.round(xs.mean()))
-    return cy, cx
-
-
-def recenter_sinogram_from_hu(sino, hu):
-    """
-    Compute HU centroid shift and apply same shift to sinogram.
-    Sino is shape (N_views, det_count).
-    """
-
-    H, W = hu.shape
-    N_views, N_det = sino.shape
-
-    cy, cx = detect_head_center(hu)
-    target_cy, target_cx = H//2, W//2
-
-    dy = target_cy - cy
-    dx = target_cx - cx
-
-    # 💡 Only horizontal shift affects sinogram → shift detector axis (dx)
-    # vertical shift dy affects projection path → would require view-dependent correction.
-    # For head CT it is enough to correct dx (dominant).
-    sino_shifted = torch.roll(sino, shifts=dx, dims=1)
-    return sino_shifted
-
-
-# ---------------------------------------------------------
-# RAMP + HANN FILTER
-# ---------------------------------------------------------
-def ramp_hann_filter(sino):
     device = sino.device
-    n_det = sino.shape[-1]
+    _, det_u, _ = sino.shape
 
-    freqs = torch.fft.rfftfreq(n_det, d=1.0, device=device)
-    ramp = torch.abs(freqs)
+    freqs = torch.fft.fftfreq(det_u, device=device)
+    omega = 2.0 * math.pi * freqs
+    ramp = torch.abs(omega).reshape(1, det_u, 1)
 
-    hann = 0.5 * (1.0 + torch.cos(np.pi * freqs / (freqs.max() + 1e-8)))
+    # Hann window around cutoff
+    fmax = freqs.abs().max().item() if freqs.numel() > 0 else 0.0
+    if fmax == 0:
+        hann = torch.ones_like(freqs, device=device)
+    else:
+        cutoff = cutoff_ratio * fmax
+        x = freqs / (cutoff + 1e-12)
+        x = torch.clamp(x, -1.0, 1.0)
+        hann = 0.5 * (1.0 + torch.cos(x * math.pi))
+    hann = hann.reshape(1, det_u, 1)
+
     filt = ramp * hann
+    S = torch.fft.fft(sino, dim=1)
+    S_f = S * filt
+    out = torch.real(torch.fft.ifft(S_f, dim=1))
+    return out
 
-    S = torch.fft.rfft(sino, dim=-1)
-    S = S * filt.unsqueeze(0)
-    return torch.fft.irfft(S, n_det, dim=-1)
-
-
-# ---------------------------------------------------------
-# LOAD MATCHING HU SLICE FOR A SINOGRAM
-# ---------------------------------------------------------
-def load_corresponding_hu(dcm_path):
-    ds = pydicom.dcmread(str(dcm_path))
-    arr = ds.pixel_array.astype(np.float32)
-    slope = float(getattr(ds, "RescaleSlope", 1.0))
-    inter = float(getattr(ds, "RescaleIntercept", 0.0))
-    hu = arr * slope + inter
-    hu = np.clip(hu, -1024, 3071)
-    return hu
-
-
-def find_matching_dicom(sino_path):
+def save_slices_per_slice_norm(volume: np.ndarray, out_folder: Path, prefix: str = "slice"):
     """
-    Reconstruct original DICOM path from sinogram path.
-    Assumes CLEAN_SINOGRAM_ROOT mirrors DATASET_PATH structure.
+    Normalize and save each slice independently so PNGs are not gray.
+    volume: numpy array with shape (Z, Y, X)
     """
-    relative = sino_path.relative_to(CLEAN_SINOGRAM_ROOT)
-    dcm_path = Path(DATASET_PATH) / relative.with_suffix(".dcm")
-    return dcm_path
+    out_folder.mkdir(parents=True, exist_ok=True)
+    Nz = volume.shape[0]
+    for i in range(Nz):
+        sl = volume[i].astype(np.float32)
+        # per-slice normalization
+        sl = sl - np.min(sl)
+        mx = np.max(sl)
+        if mx > 0:
+            sl = sl / mx
+        else:
+            sl = np.zeros_like(sl)
+        img = (sl * 255.0).astype(np.uint8)
+        Image.fromarray(img).save(out_folder / f"{prefix}_{i:03d}.png")
 
+def save_mid_preview(volume: np.ndarray, out_file: Path, title: str = ""):
+    """Save a single mid-slice preview using matplotlib (better display)."""
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    mid = volume.shape[0] // 2
+    plt.figure(figsize=(6,6))
+    plt.imshow(volume[mid], cmap="gray", interpolation="nearest")
+    plt.axis("off")
+    if title:
+        plt.title(title)
+    plt.tight_layout()
+    plt.savefig(out_file, bbox_inches="tight", dpi=150)
+    plt.close()
 
-# ---------------------------------------------------------
-# MAIN
-# ---------------------------------------------------------
+# -------------------------
+# Main per-sinogram reconstruction
+# -------------------------
+def reconstruct_one(path: Path, device: torch.device):
+    sino_np, meta = load_sino_and_meta(path)
+
+    if sino_np.ndim != 3:
+        raise ValueError(f"Sinogram {path.name} shape {sino_np.shape} not supported (expect 3D)")
+
+    views, det_u, det_v = sino_np.shape
+
+    # read geometry from metadata if present, else use defaults
+    geom = meta.get("geometry", {})
+    NUM_VIEWS = int(geom.get("NUM_VIEWS", views if views else NUM_VIEWS_DEFAULT))
+    SID = float(geom.get("SID", SID_DEFAULT))
+    SDD = float(geom.get("SDD", SDD_DEFAULT))
+    DU = float(geom.get("DU", DU_DEFAULT))
+    DV = float(geom.get("DV", DV_DEFAULT))
+
+    # determine reconstruction grid size
+    if "reco_shape" in meta:
+        RECO_Z, RECO_Y, RECO_X = meta["reco_shape"]
+    elif RECO_SHAPE_DEFAULT is not None:
+        RECO_Z = RECO_Y = RECO_X = RECO_SHAPE_DEFAULT
+    else:
+        # default: use det_v (height) as cubic grid
+        RECO_Z = RECO_Y = RECO_X = det_v
+
+    # angles (consistent with projection creation)
+    angles = torch.linspace(0.0, 2.0 * math.pi, NUM_VIEWS + 1, dtype=torch.float32, device=device)[:-1]
+
+    # convert sino to tensor on device
+    sino = torch.tensor(sino_np.astype(np.float32), device=device).contiguous()
+
+    # cone-beam weighting (per projection sample)
+    u = (torch.arange(det_u, device=device) - (det_u - 1) / 2.0) * DU
+    v = (torch.arange(det_v, device=device) - (det_v - 1) / 2.0) * DV
+    uu, vv = torch.meshgrid(u, v, indexing="ij")  # (det_u, det_v)
+    D = float(SDD)
+    W = D / torch.sqrt(D * D + uu*uu + vv * vv)  # (det_u, det_v)
+    W = W.unsqueeze(0)  # (1, det_u, det_v)
+    sino_w = sino * W
+
+    # ramp filter with window
+    sino_filt = ramp_filter_windowed(sino_w, cutoff_ratio=0.9).contiguous()
+
+    # voxel_size — best read from metadata if present
+    #voxel_size = float(meta.get("voxel_size", DU * (SID / SDD)))  # fallback heuristic
+    voxel_size = float(meta.get("voxel_size", 0.5))   # or your actual PixelSpacing
+
+    # Backprojection
+    reco = ConeBackprojectorFunction.apply(
+        sino_filt, angles,
+        int(RECO_Z), int(RECO_Y), int(RECO_X),
+        DU, DV,
+        SDD, SID, voxel_size
+    )
+
+    # normalization factor for discrete angular sampling (FDK)
+    reco = reco * (math.pi / float(NUM_VIEWS))
+
+    reco_np = reco.detach().cpu().numpy().astype(np.float32)
+
+    # Save outputs (PNG only)
+    base = path.stem
+    out_folder = OUT_ROOT / base
+    # per-slice PNGs
+    save_slices_per_slice_norm(reco_np, out_folder / "slices", prefix="slice")
+    # mid-slice preview (matplotlib)
+    save_mid_preview(reco_np, out_folder / f"{base}_mid.png", title=base)
+    # also save sinogram preview image (optional)
+    # create central-row/column preview and save
+    try:
+        # plot same preview as earlier pipeline
+        num_views, U, V = sino_np.shape
+        mid_u = U // 2
+        mid_v = V // 2
+        fig, axs = plt.subplots(1, 3, figsize=(15,5))
+        axs[0].imshow(sino_np[:, :, mid_v].T, cmap="gray", aspect="auto"); axs[0].set_title("Central detector-row")
+        axs[1].imshow(sino_np[:, mid_u, :].T, cmap="gray", aspect="auto"); axs[1].set_title("Central detector-column")
+        axs[2].imshow(sino_np[num_views//2], cmap="gray"); axs[2].set_title("One projection")
+        plt.tight_layout()
+        preview_png = out_folder / f"{base}_sino_preview.png"
+        out_folder.mkdir(parents=True, exist_ok=True)
+        plt.savefig(preview_png, dpi=150)
+        plt.close()
+    except Exception:
+        pass
+
+    return out_folder
+
+# -------------------------
+# Entrypoint
+# -------------------------
 def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device("cuda" if (USE_GPU and torch.cuda.is_available()) else "cpu")
+    print("Using device:", device)
 
-    N_VIEWS = 720
-    angles = torch.linspace(0, 2*np.pi, N_VIEWS, device=device)[:-1]
+    files = sorted([p for p in SINO_DIR.iterdir() if p.suffix == ".npy"])
+    files = files[:MAX_FILES]
+    if not files:
+        print("No .npy sinograms found in", SINO_DIR)
+        return
 
-    sino_files = list(Path(CLEAN_SINOGRAM_ROOT).rglob("*.npy"))[:NUM_SAMPLES]
+    print(f"Found {len(files)} sinograms; reconstructing up to {MAX_FILES}...")
 
-    print(f"Reconstructing {len(sino_files)} sinograms...")
+    for p in tqdm(files, desc="Reconstructing"):
+        try:
+            out = reconstruct_one(p, device)
+            print("Saved PNGs in:", out)
+        except Exception as e:
+            print(f"Failed {p.name}: {e}")
 
-    for idx, sino_path in enumerate(tqdm(sino_files)):
-
-        # 1) Load sinogram
-        sino_np = np.load(sino_path)
-        sino_np = sino_np.astype(np.float32)
-        sino = torch.from_numpy(sino_np).to(device)
-
-        # 2) Load matching HU slice for centering
-        dcm_path = find_matching_dicom(sino_path)
-        hu = load_corresponding_hu(dcm_path)
-
-        # 3) Recenter sinogram using detected head position
-        sino = recenter_sinogram_from_hu(sino, hu)
-
-        # 4) Filter sinogram
-        sino_filt = ramp_hann_filter(sino)
-
-        # 5) Backproject
-        H, W = 512, 512
-        with torch.no_grad():
-            recon = FanBackprojectorFunction.apply(
-                sino_filt,
-                angles,
-                float(DET_SPACING),
-                int(H),
-                int(W),
-                float(SDD),
-                float(SID),
-                float(VOXEL_SPACING)
-            )
-
-        # 6) Normalize
-        recon = recon * (np.pi / (2 * N_VIEWS))
-
-        # 7) Convert to HU
-        recon_mu = recon.cpu().numpy()
-        recon_hu = 1000.0 * (recon_mu / MU_WATER - 1.0)
-
-        # 8) Save PNG
-        save_path = OUT_DIR / f"recon_{idx:03d}.png"
-        disp = np.clip((recon_hu + 1000) / 3000, 0, 1)
-        plt.imsave(save_path, disp, cmap="gray")
-
-    print(f"\n✅ Saved reconstructions in: {OUT_DIR.resolve()}")
-
+    print("Done. All PNG outputs saved to:", OUT_ROOT)
 
 if __name__ == "__main__":
     main()
