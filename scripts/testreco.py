@@ -1,49 +1,119 @@
-#!/usr/bin/env python3
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
-
-# ---------------------------------------------------------
-# Path to the sinogram directory
-# ---------------------------------------------------------
 from config import CLEAN_SINOGRAM_ROOT
 
-# ---------------------------------------------------------
-# Save sinogram PNGs in same directory as this script
-# ---------------------------------------------------------
-SCRIPT_DIR = Path(__file__).parent.resolve()
+# -------------------------
+# CONFIG
+# -------------------------
+NUM_FILES = 10
+OUTPUT_FOLDER = "sinogram_preview_2d"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SINO_DIR = CLEAN_SINOGRAM_ROOT
+OUT_DIR = os.path.join(SCRIPT_DIR, OUTPUT_FOLDER)
+os.makedirs(OUT_DIR, exist_ok=True)
 
-def show_and_save_sinogram(sino, out_file):
-    plt.figure(figsize=(7, 5))
-    plt.imshow(sino, cmap='gray', aspect='auto')
-    plt.colorbar(label="Line Integral")
-    plt.title("Sinogram Preview")
+
+# -----------------------------------------------------
+# 1D Ramp Filter
+# -----------------------------------------------------
+def ramp_filter_sinogram(sino):
+    """
+    sino: (views, det_u, det_v)
+    Filter is applied along det_u (axis=1) for each v column.
+    """
+
+    views, det_u, det_v = sino.shape
+    sino_f = np.zeros_like(sino, dtype=np.float32)
+
+    # frequency axis
+    freqs = np.fft.fftfreq(det_u)
+    ramp = np.abs(freqs)
+
+    for i in range(views):
+        # FFT along detector-u
+        F = np.fft.fft(sino[i], axis=0)
+        F_filtered = F * ramp[:, None]   # apply ramp along u
+        sino_f[i] = np.real(np.fft.ifft(F_filtered, axis=0))
+
+    return sino_f
+
+
+# -----------------------------------------------------
+# VISUALIZATION FUNCTION (NOW WITH FILTERED SINO)
+# -----------------------------------------------------
+def save_sinogram_plots(sino, filename):
+    num_views, det_u, det_v = sino.shape
+    mid_v = det_v // 2
+    mid_u = det_u // 2
+
+    # Compute filtered sinogram
+    sino_filtered = ramp_filter_sinogram(sino)
+
+    fig, axs = plt.subplots(1, 4, figsize=(22, 5))
+
+    # 1) Central detector-row sinogram
+    axs[0].imshow(sino[:, :, mid_v].T, cmap='gray', aspect='auto')
+    axs[0].set_title("Central detector-row\n(clean)")
+    axs[0].set_xlabel("Projection index")
+    axs[0].set_ylabel("Detector u")
+
+    # 2) Central detector-column sinogram
+    axs[1].imshow(sino[:, mid_u, :].T, cmap='gray', aspect='auto')
+    axs[1].set_title("Central detector-column\n(clean)")
+    axs[1].set_xlabel("Projection index")
+    axs[1].set_ylabel("Detector v")
+
+    # 3) One projection (clean view)
+    axs[2].imshow(sino[num_views // 2], cmap='gray')
+    axs[2].set_title("One mid-angle projection\n(clean)")
+    axs[2].set_xlabel("Detector u")
+    axs[2].set_ylabel("Detector v")
+
+    # 4) Filtered sinogram row
+    axs[3].imshow(sino_filtered[:, :, mid_v].T, cmap='gray', aspect='auto')
+    axs[3].set_title("Filtered sinogram (ramp)\ncentral detector-row")
+    axs[3].set_xlabel("Projection index")
+    axs[3].set_ylabel("Detector u")
+
     plt.tight_layout()
-    plt.savefig(out_file, dpi=150)
+
+    save_path = os.path.join(OUT_DIR, f"{filename}.png")
+    plt.savefig(save_path, dpi=150)
     plt.close()
 
+    print(f"Saved: {save_path}")
 
+
+# -----------------------------------------------------
+# MAIN
+# -----------------------------------------------------
 def main():
-    # Collect all .npy sinograms
-    sinograms = sorted(CLEAN_SINOGRAM_ROOT.rglob("*.npy"))
-
-    if len(sinograms) == 0:
-        print("❌ No .npy sinograms found!")
+    if not os.path.isdir(SINO_DIR):
+        print(f"Sinogram directory not found: {SINO_DIR}")
         return
 
-    print(f"Found {len(sinograms)} sinograms. Saving first 5 PNGs...")
+    files = [f for f in os.listdir(SINO_DIR) if f.endswith(".npy")]
+    files = sorted(files)[:NUM_FILES]
 
-    for i, path in enumerate(sinograms[:5]):
+    if not files:
+        print("No .npy files found.")
+        return
+
+    print(f"Processing {len(files)} sinograms...")
+
+    for f in files:
+        path = os.path.join(SINO_DIR, f)
+        print(f"Loading: {path}")
+
         sino = np.load(path)
-        sino = np.squeeze(sino)  # Remove extra dimension if present
+        print(f"Shape: {sino.shape}")
 
-        out_file = SCRIPT_DIR / f"sinogram_{i}.png"
-        show_and_save_sinogram(sino, out_file)
+        file_id = os.path.splitext(f)[0]
+        save_sinogram_plots(sino, file_id)
 
-        print(f"Saved: {out_file}")
+    print(f"\nAll plots saved in: {OUT_DIR}")
 
-    print("\n✅ Finished! PNGs saved next to this script.")
 
 if __name__ == "__main__":
     main()
