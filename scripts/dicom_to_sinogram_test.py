@@ -1,134 +1,200 @@
+#!/usr/bin/env python3
 import os
-import pydicom
+import math
 import numpy as np
+import pydicom
 import torch
-from tqdm import tqdm
+import matplotlib.pyplot as plt
 from pathlib import Path
-from pydicom.uid import ExplicitVRLittleEndian
-from diffct.differentiable import FanProjectorFunction
-from config import DATASET_PATH, CLEAN_SINOGRAM_ROOT, SUBSET_ROOT, MAX_SAMPLES_TEST, DET_COUNT_FACTOR
+from tqdm import tqdm
+
+from diffct.differentiable import ConeProjectorFunction
+from config import DATASET_PATH, CLEAN_SINOGRAM_ROOT, TEST_CLEAN_SINOGRAM
 
 
-# ------------------------------------------
-# Load DICOM and convert to HU
-# ------------------------------------------
-def dicom_to_hu_and_geometry(path: Path):
-    ds = pydicom.dcmread(str(path), force=True)
+# -----------------------------------------------------------
+# 1. LOAD DICOM SERIES (NO HU CONVERSION)
+# -----------------------------------------------------------
+def load_dicom_series(folder):
+    files = [
+        os.path.join(folder, f)
+        for f in os.listdir(folder)
+        if f.lower().endswith(".dcm")
+    ]
 
-    # -------------------------------
-    # FIX 1: Ensure Transfer Syntax exists
-    # -------------------------------
-    if "TransferSyntaxUID" not in ds.file_meta:
-        ds.file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
+    # Safe sorting
+    def sort_key(p):
+        try:
+            return pydicom.dcmread(p, stop_before_pixels=True).InstanceNumber
+        except:
+            return 0
 
-    # -------------------------------
-    # FIX 2: Only process CT slices
-    # -------------------------------
-    if getattr(ds, "Modality", None) != "CT":
-        raise ValueError(f"Not a CT slice: {path}")
+    files_sorted = sorted(files, key=sort_key)
 
-    # -------------------------------
-    # Pixel data decoding
-    # -------------------------------
-    try:
-        img = ds.pixel_array.astype(np.float32)
-    except Exception as e:
-        raise ValueError(f"Cannot decode pixel data: {path}\n{e}")
+    slices = []
+    first_ds = None
 
-    # HU conversion
-    slope = float(getattr(ds, "RescaleSlope", 1.0))
-    inter = float(getattr(ds, "RescaleIntercept", 0.0))
-    hu = img * slope + inter
+    for f in files_sorted:
+        ds = pydicom.dcmread(f)
+        arr = ds.pixel_array.astype(np.float32)
 
-    # Geometry
-    if "PixelSpacing" not in ds:
-        raise ValueError("Missing PixelSpacing")
+        if first_ds is None:
+            first_ds = ds
 
-    pixel_size = float(ds.PixelSpacing[0])  # mm
+        slices.append(arr)
 
-    SDD = float(getattr(ds, "DistanceSourceToDetector", 946.746))
-    SAD = float(getattr(ds, "DistanceSourceToPatient", 538.52))
-
-    return hu.astype(np.float32), pixel_size, SDD, SAD
+    volume = np.stack(slices, axis=0)  # (Z, Y, X)
+    return volume, first_ds
 
 
-# ------------------------------------------
-# HU -> sinogram
-# ------------------------------------------
-@torch.no_grad()
-def hu_to_sinogram(hu: np.ndarray, angles: torch.Tensor, pixel_size, SDD, SAD):
-    H, W = hu.shape
-    device = angles.device
+# -----------------------------------------------------------
+# 3. VISUALIZE SINOGRAM
+# -----------------------------------------------------------
+def save_sino_preview(sino, out_png):
 
-    n_detectors = max(int(W * DET_COUNT_FACTOR), W)
-    det_spacing = pixel_size
+    num_views, U, V = sino.shape
+    mid_u = U // 2
+    mid_v = V // 2
 
-    phantom = torch.from_numpy(hu).to(device=device, dtype=torch.float32)
+    fig, axs = plt.subplots(1, 3, figsize=(18, 6))
 
-    sino = FanProjectorFunction.apply(
-        phantom,
-        angles,
-        int(n_detectors),
-        float(det_spacing),
-        float(SDD),
-        float(SAD),
-        float(pixel_size),
-    )
+    axs[0].imshow(sino[:, :, mid_v].T, cmap='gray', aspect='auto')
+    axs[0].set_title("Central detector-row")
 
-    return sino.cpu().numpy()
+    axs[1].imshow(sino[:, mid_u, :].T, cmap='gray', aspect='auto')
+    axs[1].set_title("Central detector-column")
+
+    axs[2].imshow(sino[num_views//2], cmap='gray')
+    axs[2].set_title("One projection")
+
+    plt.tight_layout()
+    plt.savefig(out_png, dpi=150)
+    plt.close()
 
 
-# ------------------------------------------
-# Main: create test subset
-# ------------------------------------------
-def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    angles = torch.linspace(0, 2*np.pi, 360, device=device)[:-1]
 
-    SUBSET_ROOT.mkdir(parents=True, exist_ok=True)
+# -----------------------------------------------------------
+# NEW: 4. SELECT THE CORRECT CT SERIES
+# -----------------------------------------------------------
+def select_ct_series(patient_dir):
+    """
+    Choose exactly one series per patient:
+      1) Prefer CT PLAIN THIN
+      2) Else CT Plain
+      3) Else skip
+    """
 
-    processed = 0
+    thin = []
+    plain = []
 
-    for root, _, files in os.walk(DATASET_PATH):
-        dcm_files = [f for f in files if f.lower().endswith(".dcm")]
-        if not dcm_files:
+    for root, _, files in os.walk(patient_dir):
+        if not any(f.lower().endswith(".dcm") for f in files):
             continue
 
-        out_dir = SUBSET_ROOT / Path(root).relative_to(DATASET_PATH)
-        out_dir.mkdir(parents=True, exist_ok=True)
+        folder = Path(root).name.lower()
 
-        for filename in tqdm(dcm_files, desc=f"Creating Test Subset ({processed}/{MAX_SAMPLES_TEST})"):
-            if processed >= MAX_SAMPLES_TEST:
-                break
+        if "ct plain thin" in folder or "ct_plain_thin" in folder or "plain thin" in folder:
+            thin.append(root)
 
-            dcm_path = Path(root) / filename
+        elif "ct plain" in folder or "ct_plain" in folder:
+            plain.append(root)
 
-            subset_out_path = out_dir / (filename.replace(".dcm", ".npy"))
-            train_out_path = CLEAN_SINOGRAM_ROOT / Path(root).relative_to(DATASET_PATH) / (filename.replace(".dcm", ".npy"))
-
-            # Skip if already in training sinograms
-            if train_out_path.exists() or subset_out_path.exists():
-                continue
-
-            # Safely load HU
-            try:
-                hu, pixel_size, SDD, SAD = dicom_to_hu_and_geometry(dcm_path)
-            except Exception as e:
-                print(f"[SKIP] {dcm_path}: {e}")
-                continue
-
-            # Safely convert to sinogram
-            try:
-                sino = hu_to_sinogram(hu, angles, pixel_size, SDD, SAD)
-            except Exception as e:
-                print(f"[SKIP] Sinogram failure at {dcm_path}: {e}")
-                continue
-
-            np.save(subset_out_path, sino)
-            processed += 1
-
-    print(f"\n✅ Wrote {processed} test sinograms to {SUBSET_ROOT}")
+    if len(thin) > 0:
+        return sorted(thin)[0]
+    if len(plain) > 0:
+        return sorted(plain)[0]
+    return None
 
 
+
+def main():
+
+    ROOT = Path(DATASET_PATH)
+    OUT_DIR = Path(TEST_CLEAN_SINOGRAM)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # -----------------------------------------------------------
+    # Collect already-processed patients from CLEAN_SINOGRAM_ROOT
+    # -----------------------------------------------------------
+    existing_patients = set(
+        p.stem for p in Path(CLEAN_SINOGRAM_ROOT).glob("*.npy")
+    )
+    print(f"Found {len(existing_patients)} existing sinograms. Skipping those patients.")
+
+    # Geometry (UNCHANGED)
+    det_u = 800
+    det_v = 800
+    du = dv = 1.0
+    sid = 530
+    sdd = 1095
+    num_views = 540
+
+    angles = torch.linspace(0, 2 * math.pi, num_views, device="cuda")
+
+    # Find patient folders
+    patients = sorted([
+        p for p in ROOT.rglob("*")
+        if p.is_dir() and p.name.startswith("CQ500CT")
+    ])
+
+    print(f"Found {len(patients)} total patients.")
+
+    for p in tqdm(patients, desc="Processing unseen patients"):
+
+        # -------------------------------------------------------
+        # SKIP patients already used for training
+        # -------------------------------------------------------
+        if p.name in existing_patients:
+            continue
+
+        # -------------------------------------------------------
+        # Select correct CT series (UNCHANGED)
+        # -------------------------------------------------------
+        series = select_ct_series(str(p))
+        if series is None:
+            print(f"Skipping {p.name}: No CT PLAIN THIN or CT Plain found.")
+            continue
+
+        # -------------------------------------------------------
+        # Load DICOM volume (UNCHANGED)
+        # -------------------------------------------------------
+        vol_np, first_ds = load_dicom_series(series)
+
+        vol_np = vol_np.astype(np.float32)
+        vol_np = (vol_np - vol_np.min()) / (vol_np.max() - vol_np.min())
+
+        Nz, Ny, Nx = vol_np.shape
+
+        px, py = map(float, first_ds.PixelSpacing)
+        th = float(getattr(first_ds, "SliceThickness", min(px, py)))
+        voxel_spacing = min(px, py, th)
+
+        vol_torch = torch.tensor(
+            vol_np, dtype=torch.float32, device="cuda"
+        ).contiguous()
+
+        # -------------------------------------------------------
+        # Forward projection (UNCHANGED)
+        # -------------------------------------------------------
+        sino = ConeProjectorFunction.apply(
+            vol_torch,
+            angles,
+            det_u, det_v,
+            du, dv,
+            sdd, sid,
+            voxel_spacing
+        )
+
+        sino_np = sino.detach().cpu().numpy()
+
+        # -------------------------------------------------------
+        # Save new unseen sinograms
+        # -------------------------------------------------------
+        np.save(OUT_DIR / f"{p.name}.npy", sino_np)
+        save_sino_preview(sino_np, OUT_DIR / f"{p.name}.png")
+
+    print("\nDONE — unseen sinograms generated & saved.")
+
+# -----------------------------------------------------------
 if __name__ == "__main__":
     main()

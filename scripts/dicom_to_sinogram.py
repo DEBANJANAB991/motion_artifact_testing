@@ -1,113 +1,194 @@
 #!/usr/bin/env python3
 import os
-import pydicom
+import math
 import numpy as np
+import pydicom
 import torch
-from tqdm import tqdm
+import matplotlib.pyplot as plt
 from pathlib import Path
+from tqdm import tqdm
 
-from diffct.differentiable import FanProjectorFunction
-from config import DATASET_PATH, CLEAN_SINOGRAM_ROOT, MAX_SAMPLES
-
-# ---------------------------------------------------------
-# FIXED SYNTHETIC SCANNER GEOMETRY (MUST MATCH ROUND TRIP)
-# ---------------------------------------------------------
-SID = 560.0
-SDD = 1100.0
-DET_SPACING = 1.2
-DET_COUNT = 736
-VOXEL_SPACING = 1.0   # MUST remain 1.0
-MU_WATER = 0.019
-# ---------------------------------------------------------
-
-# ---------------------------------------------------------
-# Load DICOM → Extract HU only (not pixel spacing)
-# ---------------------------------------------------------
-def dicom_to_hu(path: Path):
-    ds = pydicom.dcmread(str(path), force=True)
-
-    img = ds.pixel_array.astype(np.float32)
-    slope = float(getattr(ds, "RescaleSlope", 1.0))
-    inter = float(getattr(ds, "RescaleIntercept", 0.0))
-    hu = img * slope + inter
-
-    hu = np.clip(hu, -1024, 3071)
-    return hu, ds
+from diffct.differentiable import ConeProjectorFunction
+from config import DATASET_PATH, CLEAN_SINOGRAM_ROOT
 
 
-# ---------------------------------------------------------
-# HU → Sinogram (matching reconstruction geometry)
-# ---------------------------------------------------------
-@torch.no_grad()
-def hu_to_sinogram_fanbeam(
-    hu,
-    angles,
-):
-    device = angles.device
+# -----------------------------------------------------------
+# 1. LOAD DICOM SERIES (NO HU CONVERSION)
+# -----------------------------------------------------------
+def load_dicom_series(folder):
+    files = [
+        os.path.join(folder, f)
+        for f in os.listdir(folder)
+        if f.lower().endswith(".dcm")
+    ]
 
-    # convert HU → μ
-    mu_img = MU_WATER * (1.0 + (hu / 1000.0))
-    phantom = torch.from_numpy(mu_img.astype(np.float32)).to(device)
+    # Safe sorting
+    def sort_key(p):
+        try:
+            return pydicom.dcmread(p, stop_before_pixels=True).InstanceNumber
+        except:
+            return 0
 
-    sino = FanProjectorFunction.apply(
-        phantom,
-        angles,
-        int(DET_COUNT),
-        float(DET_SPACING),
-        float(SDD),
-        float(SID),
-        float(VOXEL_SPACING)  # fixed voxel spacing
-    )
+    files_sorted = sorted(files, key=sort_key)
 
-    if sino.ndim == 3:
-        sino = sino[:, sino.shape[1] // 2, :].contiguous()
+    slices = []
+    first_ds = None
 
-    return sino.cpu().numpy()
+    for f in files_sorted:
+        ds = pydicom.dcmread(f)
+        arr = ds.pixel_array.astype(np.float32)
+
+        if first_ds is None:
+            first_ds = ds
+
+        slices.append(arr)
+
+    volume = np.stack(slices, axis=0)  # (Z, Y, X)
+    return volume, first_ds
 
 
-# ---------------------------------------------------------
-# Convert dataset
-# ---------------------------------------------------------
-def main():
+# -----------------------------------------------------------
+# 3. VISUALIZE SINOGRAM
+# -----------------------------------------------------------
+def save_sino_preview(sino, out_png):
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    num_views, U, V = sino.shape
+    mid_u = U // 2
+    mid_v = V // 2
 
-    angles = torch.linspace(0, 2*np.pi, 720, device=device)[:-1]
-    angles = angles.to(device)
+    fig, axs = plt.subplots(1, 3, figsize=(18, 6))
 
-    CLEAN_SINOGRAM_ROOT.mkdir(parents=True, exist_ok=True)
-    processed = 0
+    axs[0].imshow(sino[:, :, mid_v].T, cmap='gray', aspect='auto')
+    axs[0].set_title("Central detector-row")
 
-    for root, _, files in os.walk(DATASET_PATH):
-        dcm_files = [f for f in files if f.lower().endswith(".dcm")]
-        if not dcm_files:
+    axs[1].imshow(sino[:, mid_u, :].T, cmap='gray', aspect='auto')
+    axs[1].set_title("Central detector-column")
+
+    axs[2].imshow(sino[num_views//2], cmap='gray')
+    axs[2].set_title("One projection")
+
+    plt.tight_layout()
+    plt.savefig(out_png, dpi=150)
+    plt.close()
+
+
+
+# -----------------------------------------------------------
+# NEW: 4. SELECT THE CORRECT CT SERIES
+# -----------------------------------------------------------
+def select_ct_series(patient_dir):
+    """
+    Choose exactly one series per patient:
+      1) Prefer CT PLAIN THIN
+      2) Else CT Plain
+      3) Else skip
+    """
+
+    thin = []
+    plain = []
+
+    for root, _, files in os.walk(patient_dir):
+        if not any(f.lower().endswith(".dcm") for f in files):
             continue
 
-        out_dir = CLEAN_SINOGRAM_ROOT / Path(root).relative_to(DATASET_PATH)
-        out_dir.mkdir(parents=True, exist_ok=True)
+        folder = Path(root).name.lower()
 
-        for filename in tqdm(dcm_files, desc=f"Converting ({processed}/{MAX_SAMPLES})"):
+        if "ct plain thin" in folder or "ct_plain_thin" in folder or "plain thin" in folder:
+            thin.append(root)
 
-            if processed >= MAX_SAMPLES:
-                break
+        elif "ct plain" in folder or "ct_plain" in folder:
+            plain.append(root)
 
-            dcm_path = Path(root) / filename
-            out_path = out_dir / (filename.replace(".dcm", ".npy"))
-
-            if out_path.exists():
-                continue
-
-            hu, ds = dicom_to_hu(dcm_path)
-
-            # generate sinogram
-            sino = hu_to_sinogram_fanbeam(hu, angles).astype(np.float32)
-
-            # save
-            np.save(out_path, sino)
-            processed += 1
-
-    print(f"\n✅ Wrote {processed} sinograms to {CLEAN_SINOGRAM_ROOT}")
+    if len(thin) > 0:
+        return sorted(thin)[0]
+    if len(plain) > 0:
+        return sorted(plain)[0]
+    return None
 
 
+
+# -----------------------------------------------------------
+# 5. MAIN SINOGRAM GENERATION
+# -----------------------------------------------------------
+def main():
+
+    ROOT = Path(DATASET_PATH)
+    OUT_DIR = Path(CLEAN_SINOGRAM_ROOT)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Geometry
+    det_u = 800
+    det_v = 800
+    du = dv = 1.0
+    sid = 530
+    sdd = 1095
+    num_views = 540
+
+    angles = torch.linspace(0, 2*math.pi, num_views, device="cuda")
+
+    # Find patient folders
+    patients = sorted([
+        p for p in ROOT.rglob("*")
+        if p.is_dir() and p.name.startswith("CQ500CT")
+    ])[:100]
+
+    print(f"Found {len(patients)} patients.")
+
+    for p in tqdm(patients, desc="Processing"):
+
+        # ----------------------------------------------------
+        # NEW: choose correct CT series inside patient folder
+        # ----------------------------------------------------
+        series = select_ct_series(str(p))
+
+        if series is None:
+            print(f"Skipping {p.name}: No CT PLAIN THIN or CT Plain found.")
+            continue
+
+        print(f"Using series: {series}")
+
+        # --------------------------
+        # Load DICOM
+        # --------------------------
+        vol_np, first_ds = load_dicom_series(series)
+
+        # Normalize volume
+        vol_np = vol_np.astype(np.float32)
+        vol_np = (vol_np - vol_np.min()) / (vol_np.max() - vol_np.min())
+
+        # Pad to cube
+        #vol_np = pad_to_cube(vol_np)
+
+        Nz, Ny, Nx = vol_np.shape
+
+        # Extract voxel spacing safely
+        px, py = map(float, first_ds.PixelSpacing)
+        th = float(getattr(first_ds, "SliceThickness", min(px, py)))
+        voxel_spacing = min(px, py, th)
+
+        vol_torch = torch.tensor(vol_np, dtype=torch.float32,
+                                 device="cuda").contiguous()
+
+        # --------------------------
+        # Forward projection
+        # --------------------------
+        sino = ConeProjectorFunction.apply(
+            vol_torch, angles,
+            det_u, det_v, du, dv,
+            sdd, sid, voxel_spacing
+        )
+
+        sino_np = sino.detach().cpu().numpy()
+
+        # Save sinogram
+        np.save(OUT_DIR / f"{p.name}.npy", sino_np)
+
+        # Save visualization
+        save_sino_preview(sino_np, OUT_DIR / f"{p.name}.png")
+
+    print("\nDONE — all sinograms generated & saved.")
+
+
+# -----------------------------------------------------------
 if __name__ == "__main__":
     main()
