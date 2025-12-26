@@ -1,0 +1,150 @@
+### Starting TaskPrologue of job 1460269 on tg072 at Sun Dec  7 04:38:59 PM CET 2025
+Running on cores 6-7,14-15,22-23,30-31 with governor ondemand
+Sun Dec  7 16:38:59 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.195.03             Driver Version: 570.195.03     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:AF:00.0 Off |                    0 |
+| N/A   29C    P0             26W /  250W |       0MiB /  32768MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+Found 100 patients.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT0 CQ500CT0/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT10 CQ500CT10/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT100 CQ500CT100/Unknown Study/CT Plain THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT101 CQ500CT101/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT102 CQ500CT102/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT103 CQ500CT103: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT104 CQ500CT104/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT105 CQ500CT105: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT106 CQ500CT106: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT107 CQ500CT107: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT108 CQ500CT108: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT109 CQ500CT109: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT110 CQ500CT110: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT111 CQ500CT111/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT112 CQ500CT112/Unknown Study/CT Plain THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT113 CQ500CT113/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT114 CQ500CT114/Unknown Study/CT Plain THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT115 CQ500CT115/Unknown Study/CT Plain 3mm
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct01/CQ500CT116 CQ500CT116/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT117 CQ500CT117: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT11 CQ500CT11: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT117 CQ500CT117: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT118 CQ500CT118/Unknown Study/CT Plain 3mm
+Skipping CQ500CT119 CQ500CT119: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT12 CQ500CT12: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT121 CQ500CT121/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT122 CQ500CT122: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT124 CQ500CT124: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT125 CQ500CT125: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT126 CQ500CT126/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT127 CQ500CT127: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT128 CQ500CT128: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT129 CQ500CT129: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT13 CQ500CT13: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT130 CQ500CT130/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT131 CQ500CT131/Unknown Study/CT Plain 3mm
+Skipping CQ500CT132 CQ500CT132: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT133 CQ500CT133/Unknown Study/CT Plain 3mm
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT134 CQ500CT134/Unknown Study/CT Plain 3mm
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT135 CQ500CT135/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT136 CQ500CT136: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT137 CQ500CT137: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT138 CQ500CT138: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT139 CQ500CT139: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT140 CQ500CT140/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT141 CQ500CT141: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT142 CQ500CT142: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct02/CQ500CT143 CQ500CT143/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT144 CQ500CT144: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT14 CQ500CT14/Unknown Study/CT Plain THIN
+Skipping CQ500CT144 CQ500CT144: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT145 CQ500CT145/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT146 CQ500CT146: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT147 CQ500CT147: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT148 CQ500CT148: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT149 CQ500CT149: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT15 CQ500CT15: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT150 CQ500CT150: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT151 CQ500CT151/Unknown Study/CT Plain THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT152 CQ500CT152/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT153 CQ500CT153/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT154 CQ500CT154/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT155 CQ500CT155: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT156 CQ500CT156/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT157 CQ500CT157/Unknown Study/CT Plain 3mm
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT158 CQ500CT158/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT159 CQ500CT159: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT161 CQ500CT161/Unknown Study/CT Plain 3mm
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT162 CQ500CT162/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT163 CQ500CT163: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct03/CQ500CT164 CQ500CT164/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT165 CQ500CT165: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT166 CQ500CT166: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT167 CQ500CT167: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT16 CQ500CT16/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT167 CQ500CT167: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT168 CQ500CT168/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT169 CQ500CT169/Unknown Study/CT Plain 3mm
+Skipping CQ500CT17 CQ500CT17: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT170 CQ500CT170/Unknown Study/CT Plain 3mm
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT171 CQ500CT171/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT172 CQ500CT172: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT174 CQ500CT174: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT175 CQ500CT175: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT176 CQ500CT176/Unknown Study/CT Plain 3mm
+Skipping CQ500CT177 CQ500CT177: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT178 CQ500CT178/Unknown Study/CT PLAIN THIN
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT179 CQ500CT179/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT18 CQ500CT18: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT180 CQ500CT180: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT181 CQ500CT181: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT182 CQ500CT182: No CT PLAIN THIN or CT Plain found.
+Using series: /home/vault/iwi5/iwi5293h/CT-Motion-Artifact-Reduction_bkp/data/dicom_raw/dicom_raw/qct04/CQ500CT183 CQ500CT183/Unknown Study/CT PLAIN THIN
+Skipping CQ500CT184 CQ500CT184: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT185 CQ500CT185: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT186 CQ500CT186: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT187 CQ500CT187: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT188 CQ500CT188: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT190 CQ500CT190: No CT PLAIN THIN or CT Plain found.
+Skipping CQ500CT1 CQ500CT1: No CT PLAIN THIN or CT Plain found.
+
+DONE — all sinograms generated & saved.
+=== JOB_STATISTICS ===
+=== current date     : Sun Dec  7 04:58:00 PM CET 2025
+= Job-ID             : 1460269 on tinygpu
+= Job-Name           : dicom_to_sinogram
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : v100
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 00:19:07
+= Total RAM usage    : 20.7 GiB of requested  GiB (%)   
+= Node list          : tg072
+= Subm/Elig/Start/End: 2025-12-07T16:38:50 / 2025-12-07T16:38:50 / 2025-12-07T16:38:53 / 2025-12-07T16:58:00
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc              20.5G   104.9G   209.7G        N/A  40,594      500K   1,000K        N/A    
+    /home/woody           121.5G  1000.0G  1500.0G        N/A     144K   5,000K   7,500K        N/A    
+    /home/vault           367.2G  1048.6G  2097.2G        N/A     196K     200K     400K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:AF:00.0, 3219042, 7 %, 0 %, 4806 MiB, 1118357 ms

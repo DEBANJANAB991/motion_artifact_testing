@@ -1,0 +1,56 @@
+### Starting TaskPrologue of job 1474129 on tg072 at Thu Dec 25 02:39:09 PM CET 2025
+Running on cores 0-1,8-9,16-17,24-25 with governor ondemand
+Thu Dec 25 14:39:09 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.195.03             Driver Version: 570.195.03     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:18:00.0 Off |                    0 |
+| N/A   33C    P0             27W /  250W |       0MiB /  32768MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+Evaluating 1000 sinogram views...
+
+
+================ SINOGRAM METRICS ================
+Artifact → Clean : PSNR = 75.71 dB | SSIM = 0.9889
+MR_LKV → Clean   : PSNR = 39.10 dB | SSIM = 0.9294
+-------------------------------------------------
+Δ PSNR  = -36.61 dB
+Δ SSIM  = -0.0596
+=================================================
+=== JOB_STATISTICS ===
+=== current date     : Thu Dec 25 02:42:26 PM CET 2025
+= Job-ID             : 1474129 on tinygpu
+= Job-Name           : evaluate_sinogram_metrics
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : v100
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 12:00:00
+= Elapsed runtime    : 00:03:18
+= Total RAM usage    : 7.8 GiB of requested  GiB (%)   
+= Node list          : tg072
+= Subm/Elig/Start/End: 2025-12-25T14:39:06 / 2025-12-25T14:39:06 / 2025-12-25T14:39:08 / 2025-12-25T14:42:26
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/woody           446.9G  1000.0G  1500.0G        N/A     237K   5,000K   7,500K        N/A    
+    /home/hpc              21.4G   104.9G   209.7G        N/A  36,609      500K   1,000K        N/A    
+    /home/vault           358.9G  1048.6G  2097.2G        N/A     196K     200K     400K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
