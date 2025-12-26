@@ -19,13 +19,22 @@ from tqdm import tqdm
 from PIL import Image
 
 from diffct.differentiable import ConeBackprojectorFunction
+<<<<<<< HEAD
 from config import TEST_CLEAN_SINOGRAM  # folder containing .npy sinograms (and optional .json metadata)
+=======
+from config import CLEAN_SINOGRAM_ROOT  # folder containing .npy sinograms (and optional .json metadata)
+>>>>>>> 614225be32c37b765549a79cc466658ba9aae45f
 
 # -------------------------
 # User parameters
 # -------------------------
+<<<<<<< HEAD
 SINO_DIR = Path(TEST_CLEAN_SINOGRAM)
 OUT_ROOT = Path.cwd() / "CLEAN_reconstruction_png"   # output folder (per-sinogram subfolders)
+=======
+SINO_DIR = Path(CLEAN_SINOGRAM_ROOT)
+OUT_ROOT = Path.cwd() / "fdk_reconstructions_png"   # output folder (per-sinogram subfolders)
+>>>>>>> 614225be32c37b765549a79cc466658ba9aae45f
 OUT_ROOT.mkdir(exist_ok=True)
 
 MAX_FILES = 10            # number of sinograms to reconstruct (sorted)
