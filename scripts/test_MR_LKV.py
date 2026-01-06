@@ -17,8 +17,8 @@ from tqdm import tqdm
 
 from MR_LKV_refactorv2 import MR_LKV
 from config import (
-    ARTIFACT_SINOGRAM_2D_TEST,
-    PREDICTED_SINOGRAM_2D_TEST,
+    ARTIFACT_SINOGRAM_2D_TEST_v2 as ARTIFACT_SINOGRAM_2D_TEST,
+    PREDICTED_SINOGRAM_2D_TEST_v2 as PREDICTED_SINOGRAM_2D_TEST,
     CKPT_DIR,
 )
 
@@ -37,7 +37,7 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 # -------------------------
 model = MR_LKV(
     in_channels=1,
-    base_channels=24,          # MUST match training
+    base_channels=32,          # MUST match training
     depths=[2, 2, 3, 2],
     kernels=[35, 55, 75, 95],
     norm_type="batch",
