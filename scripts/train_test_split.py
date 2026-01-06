@@ -3,7 +3,7 @@
 Full training script for MR_LKV and baselines (UNet, RepLKNet, SwinIR, Restormer, Swin2SR)
 Adapted to your dataset layout where 2D sinograms are stored as:
   CLEAN_SINOGRAM_2D/<filename>.npy
-  ARTIFACT_SINOGRAM_2D/<same filename>.npy
+  ARTIFACT_ROOT_2D/<same filename>.npy
 
 Special behavior:
  - Groups files by patient name parsed from filenames like:
@@ -58,6 +58,7 @@ except ModuleNotFoundError:
 from config import (
     CLEAN_SINOGRAM_2D,
     ARTIFACT_SINOGRAM_2D,
+    ARTIFACT_ROOT_2D,
     CKPT_DIR,
     BATCH_SIZE,
     LR,
@@ -360,7 +361,7 @@ def parse_args():
     p = argparse.ArgumentParser(description="Train artifact-reduction models (2D sinogram views)")
     p.add_argument("--model", choices=["mr_lkv", "unet", "replk","swinir","restormer","swin2sr"], default="mr_lkv")
     p.add_argument("--clean-root",   type=Path, default=Path(CLEAN_SINOGRAM_2D))
-    p.add_argument("--art-root",     type=Path, default=Path(ARTIFACT_SINOGRAM_2D))
+    p.add_argument("--art-root",     type=Path, default=Path(ARTIFACT_ROOT_2D))
     p.add_argument("--ckpt-dir",     type=Path, default=Path(CKPT_DIR))
     p.add_argument("--batch-size",   type=int, default=BATCH_SIZE)
     p.add_argument("--lr",           type=float, default=LR)
