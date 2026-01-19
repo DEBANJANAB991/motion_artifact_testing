@@ -18,10 +18,10 @@ sys.path.insert(0, str(repo_root / "Restormer"))
 sys.path.insert(0, str(repo_root / "swin2sr"))
 
 from train_test_split import (
-    SinogramDataset, SwinIRWrapper, RestormerWrapper,
+    Sinogram2DDataset, SwinIRWrapper, RestormerWrapper,
     RepLKNetReg, MR_LKV, Swin2SRWrapper
 )
-from config import CLEAN_SINOGRAM_ROOT, ARTIFACT_ROOT, CKPT_DIR
+from config import CLEAN_SINOGRAM_2D, ARTIFACT_ROOT_2D, CKPT_DIR
 
 DEVICE     = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 1
@@ -34,16 +34,28 @@ def compute_metrics(clean_np, recon_np):
     return psnr, ssim
 
 MODELS = {
-    "mr_lkv":    {"factory": lambda: MR_LKV(1, base_channels=32, depths=[1,1,1,1], kernels=[31,51,71,91], norm_type="batch", use_decoder=True, final_activation=None), "folder": "mr_lkv"},
+   "mr_lkv": {
+    "factory": lambda: MR_LKV(
+        in_ch=1,
+        C0=32,
+        depths=(2, 2, 3, 2),
+        kernels=(35, 55, 75, 95),
+        dilations=(1, 1, 1, 1),
+        depthwise=True,
+        norm="bn",
+    ),
+    "folder": "mr_lkv"
+},
+    
     "unet":      {"factory": lambda: __import__("UNet").UNet(in_channels=1, base_channels=64, levels=4, norm_type="batch", dropout_bottleneck=0.1, final_activation=None), "folder": "unet"},
     "replknet":  {"factory": lambda: RepLKNetReg([31,29,27,13],[2,2,18,2],[64,128,256,512],0.0,5,1), "folder": "replknet"},
-    "swinir":    {"factory": lambda: SwinIRWrapper(img_size=512, window_size=8, in_chans=1, out_chans=1, depths=[4,4,4,4], embed_dim=64, num_heads=[2,2,2,2], mlp_ratio=2, use_checkpoint=True), "folder": "swinir"},
+    "swinir":    {"factory": lambda: SwinIRWrapper(img_size=512, window_size=8, in_chans=1, out_chans=1, depths=[4,4,4,4], embed_dim=64, num_heads=[2,2,2,2], mlp_ratio=4, use_checkpoint=True), "folder": "swinir"},
     "restormer": {"factory": lambda: RestormerWrapper(1,1,48,[2,2,2,4],2,[1,2,2,4],2.0,False,"WithBias"), "folder": "restormer"},
     "swin2sr":   {"factory": lambda: Swin2SRWrapper(in_ch=1, embed_dim=64, depths=(4,4,4,4), num_heads=(4,4,4,4), window_size=8, upscale=1, upsampler='', img_range=1.0, img_size=(64,64)), "folder": "swin2sr"},
 }
 
 def main():
-    ds = SinogramDataset(CLEAN_SINOGRAM_ROOT, ARTIFACT_ROOT, patch=64)
+    ds = Sinogram2DDataset(CLEAN_SINOGRAM_2D, ARTIFACT_ROOT_2D, patch_size=64)
     N  = len(ds)
     n_train = int(0.8 * N)
     n_val   = int(0.1 * N)
@@ -63,7 +75,14 @@ def main():
             continue
 
         model = info["factory"]().to(DEVICE)
-        model.load_state_dict(torch.load(ckpt, map_location=DEVICE))
+        checkpoint = torch.load(ckpt, map_location=DEVICE)
+
+        if isinstance(checkpoint, dict) and "model" in checkpoint:
+            model.load_state_dict(checkpoint["model"])
+        else:
+            # fallback for older checkpoints
+            model.load_state_dict(checkpoint)
+
         model.eval()
 
         # params
