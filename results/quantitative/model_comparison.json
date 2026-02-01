@@ -1,0 +1,42 @@
+[
+  {
+    "model":"mr_lkv",
+    "PSNR (dB)":39.97,
+    "SSIM":0.994,
+    "Params (M)":8.06,
+    "FLOPs (GMac)":27.87,
+    "Inf (ms)":30.37
+  },
+  {
+    "model":"unet",
+    "PSNR (dB)":37.11,
+    "SSIM":0.9815,
+    "Params (M)":31.04,
+    "FLOPs (GMac)":218.87,
+    "Inf (ms)":21.91
+  },
+  {
+    "model":"replknet",
+    "PSNR (dB)":-12.42,
+    "SSIM":0.9034,
+    "Params (M)":21.79,
+    "FLOPs (GMac)":23.8,
+    "Inf (ms)":15.27
+  },
+  {
+    "model":"swinir",
+    "PSNR (dB)":38.98,
+    "SSIM":0.9813,
+    "Params (M)":0.99,
+    "FLOPs (GMac)":16.28,
+    "Inf (ms)":16.61
+  },
+  {
+    "model":"restormer",
+    "PSNR (dB)":11.76,
+    "SSIM":0.0233,
+    "Params (M)":12.16,
+    "FLOPs (GMac)":8.29,
+    "Inf (ms)":17.12
+  }
+]
