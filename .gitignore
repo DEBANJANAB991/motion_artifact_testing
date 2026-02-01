@@ -1,0 +1,23 @@
+# virtual env
+.venv/
+
+# python
+__pycache__/
+*.pyc
+
+# data & results
+results/
+*_preview/
+*_png/
+*_art/
+sinogram*
+reconstruction*
+CLEAN_reconstruction_png/
+artifact_reconstruction_png/
+
+# checkpoints
+*.pt
+*.pth
+
+# logs
+*.log
