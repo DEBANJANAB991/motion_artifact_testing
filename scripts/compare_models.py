@@ -3,162 +3,207 @@ import sys
 from pathlib import Path
 import time
 import torch
-import torch.nn.functional as F
 import numpy as np
-from torch.utils.data import DataLoader, random_split
-from ptflops import get_model_complexity_info
-from skimage.metrics import peak_signal_noise_ratio, structural_similarity
-
 import pandas as pd
 import matplotlib.pyplot as plt
+from ptflops import get_model_complexity_info
 
+# ============================================================
+# PATH SETUP
+# ============================================================
 repo_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(repo_root))
-sys.path.insert(0, str(repo_root / "Restormer"))
-sys.path.insert(0, str(repo_root / "swin2sr"))
 
-from train_test_split import (
-    Sinogram2DDataset, SwinIRWrapper, RestormerWrapper,
-    RepLKNetReg, MR_LKV, Swin2SRWrapper
-)
-from config import CLEAN_SINOGRAM_2D, ARTIFACT_ROOT_2D, CKPT_DIR
+# ============================================================
+# OUTPUT DIRECTORY (results/ next to this script)
+# ============================================================
+SCRIPT_DIR = Path(__file__).resolve().parent
+RESULTS_DIR = SCRIPT_DIR / "results"
+RESULTS_DIR.mkdir(exist_ok=True)
 
-DEVICE     = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 1
-NUM_WORKERS= 0
 
-def compute_metrics(clean_np, recon_np):
-    dr   = clean_np.max() - clean_np.min()
-    psnr = peak_signal_noise_ratio(clean_np, recon_np, data_range=dr)
-    ssim = structural_similarity(clean_np, recon_np, data_range=dr)
-    return psnr, ssim
+# ============================================================
+# DEVICE
+# ============================================================
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MODELS = {
-   "mr_lkv": {
-    "factory": lambda: MR_LKV(
-        in_ch=1,
-        C0=32,
-        depths=(2, 2, 3, 2),
-        kernels=(35, 55, 75, 95),
-        dilations=(1, 1, 1, 1),
-        depthwise=True,
-        norm="bn",
-    ),
-    "folder": "mr_lkv"
-},
-    
-    "unet":      {"factory": lambda: __import__("UNet").UNet(in_channels=1, base_channels=64, levels=4, norm_type="batch", dropout_bottleneck=0.1, final_activation=None), "folder": "unet"},
-    "replknet":  {"factory": lambda: RepLKNetReg([31,29,27,13],[2,2,18,2],[64,128,256,512],0.0,5,1), "folder": "replknet"},
-    "swinir":    {"factory": lambda: SwinIRWrapper(img_size=512, window_size=8, in_chans=1, out_chans=1, depths=[4,4,4,4], embed_dim=64, num_heads=[2,2,2,2], mlp_ratio=4, use_checkpoint=True), "folder": "swinir"},
-    "restormer": {"factory": lambda: RestormerWrapper(1,1,48,[2,2,2,4],2,[1,2,2,4],2.0,False,"WithBias"), "folder": "restormer"},
-    "swin2sr":   {"factory": lambda: Swin2SRWrapper(in_ch=1, embed_dim=64, depths=(4,4,4,4), num_heads=(4,4,4,4), window_size=8, upscale=1, upsampler='', img_range=1.0, img_size=(64,64)), "folder": "swin2sr"},
+# ============================================================
+# FINAL TEST METRICS (FROM .out LOGS – MANUAL)
+# ============================================================
+FINAL_METRICS = {
+    "mr_lkv":     {"PSNR": 39.97, "SSIM": 0.9940},
+    "unet":       {"PSNR": 37.11, "SSIM": 0.9815},
+    "replknet":   {"PSNR": -12.42, "SSIM": 0.9034},
+    "swinir":     {"PSNR": 38.98, "SSIM": 0.9813},
+    "restormer":  {"PSNR": 11.76, "SSIM": 0.0233},
 }
 
+# ============================================================
+# INPUT SIZES (MATCH TRAINING)
+# ============================================================
+MODEL_INPUTS = {
+    "mr_lkv":     (1, 512, 512),   # full sinogram
+    "unet":       (1, 512, 512),
+    "replknet":   (1, 512, 512),
+    "swinir":     (1, 128, 128),   # PATCH
+    "restormer":  (1, 96, 96),     # PATCH
+}
+
+# ============================================================
+# IMPORT TRAINING WRAPPERS (IMPORTANT)
+# ============================================================
+from train_test_split import (
+    MR_LKV,
+    UNet,
+    RepLKNetReg,
+    SwinIRWrapper,
+    RestormerWrapper,
+)
+
+# ============================================================
+# MODEL BUILDERS (EXACTLY AS TRAINING)
+# ============================================================
+MODELS = {
+    "mr_lkv": lambda: MR_LKV(
+        in_channels=1,
+        base_channels=32,
+        depths=[2, 2, 3, 2],
+        kernels=[35, 55, 75, 95],
+        norm_type="batch",
+        use_decoder=True,
+        final_activation=None,
+    ),
+    "unet": lambda: UNet(
+        in_channels=1,
+        base_channels=64,
+        levels=4,
+        norm_type="batch",
+        dropout_bottleneck=0.1,
+        final_activation=None,
+    ),
+    "replknet": lambda: RepLKNetReg(
+        large_kernel_sizes=[31, 29, 27, 13],
+        layers=[2, 2, 18, 2],
+        channels=[64, 128, 256, 512],
+        drop_path_rate=0.0,
+        small_kernel=5,
+        in_channels=1,
+    ),
+    "swinir": lambda: SwinIRWrapper(
+        img_size=128,
+        window_size=8,
+        in_chans=1,
+        out_chans=1,
+        depths=[4, 4, 4, 4],
+        embed_dim=64,
+        num_heads=[2, 2, 2, 2],
+        mlp_ratio=4,
+        use_checkpoint=False,
+    ),
+    "restormer": lambda: RestormerWrapper(
+        inp_channels=1,
+        out_channels=1,
+        dim=48,
+        num_blocks=[2, 2, 2, 4],
+        num_refinement_blocks=2,
+        heads=[1, 2, 2, 4],
+        ffn_expansion_factor=2.0,
+        bias=False,
+        LayerNorm_type="WithBias",
+    ),
+}
+
+# ============================================================
+# MAIN
+# ============================================================
 def main():
-    ds = Sinogram2DDataset(CLEAN_SINOGRAM_2D, ARTIFACT_ROOT_2D, patch_size=64)
-    N  = len(ds)
-    n_train = int(0.8 * N)
-    n_val   = int(0.1 * N)
-    _, _, test_ds = random_split(ds, [n_train, n_val, N-n_train-n_val], generator=torch.Generator().manual_seed(42))
-    loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
-
-    art0, clean0 = next(iter(loader))
-    H, W = clean0.shape[-2], clean0.shape[-1]
-
     results = []
-    for name, info in MODELS.items():
-        print(f"\n=== Evaluating {name} ===")
-        ckpt_dir = Path(CKPT_DIR) / info["folder"]
-        ckpt     = ckpt_dir / "best_model.pth"
-        if not ckpt.exists():
-            print(f"  Skip {name}: no checkpoint at {ckpt}")
-            continue
 
-        model = info["factory"]().to(DEVICE)
-        checkpoint = torch.load(ckpt, map_location=DEVICE)
+    for name, builder in MODELS.items():
+        print(f"Evaluating {name}")
+        model = builder().to(DEVICE).eval()
 
-        if isinstance(checkpoint, dict) and "model" in checkpoint:
-            model.load_state_dict(checkpoint["model"])
-        else:
-            # fallback for older checkpoints
-            model.load_state_dict(checkpoint)
+        C, H, W = MODEL_INPUTS[name]
+        dummy = torch.randn(1, C, H, W, device=DEVICE)
 
-        model.eval()
+        # ---------------- Params ----------------
+        params_m = sum(p.numel() for p in model.parameters()) / 1e6
 
-        # params
-        n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        # flops
-        flops_str, _ = get_model_complexity_info(model, (1, H, W), as_strings=True, print_per_layer_stat=False, verbose=False)
-        # timing
-        art_w = art0.to(DEVICE)
+        # ---------------- FLOPs (MACs) ----------------
+        macs, _ = get_model_complexity_info(
+            model,
+            (C, H, W),
+            as_strings=False,
+            print_per_layer_stat=False,
+            verbose=False,
+        )
+        flops_gmac = macs / 1e9
+
+        # ---------------- Inference Time ----------------
         with torch.no_grad():
-            for _ in range(5): _ = model(art_w)
-        start = torch.cuda.Event(enable_timing=True)
-        end   = torch.cuda.Event(enable_timing=True)
-        start.record()
-        for _ in range(len(loader)):
-            art, _ = next(iter(loader))
-            _ = model(art.to(DEVICE))
-        end.record(); torch.cuda.synchronize()
-        inf_ms = start.elapsed_time(end) / len(loader)
-        # metrics
-        psnrs, ssims = [], []
+            for _ in range(10):  # warm-up
+                _ = model(dummy)
+
+        if DEVICE.type == "cuda":
+            torch.cuda.synchronize()
+
+        start = time.time()
         with torch.no_grad():
-            for art, clean in loader:
-                out = model(art.to(DEVICE))
-                o   = out.cpu().numpy()[0,0]
-                c   = clean.numpy()[0,0]
-                p, s = compute_metrics(c, o)
-                psnrs.append(p); ssims.append(s)
+            for _ in range(50):
+                _ = model(dummy)
+
+        if DEVICE.type == "cuda":
+            torch.cuda.synchronize()
+
+        inf_ms = (time.time() - start) / 50 * 1000
 
         results.append({
-            "model":      name,
-            "params (M)": n_params/1e6,
-            "FLOPs":      flops_str,
-            "Inf (ms)":   inf_ms,
-            "PSNR (dB)":  np.mean(psnrs),
-            "SSIM":       np.mean(ssims),
+            "model": name,
+            "PSNR (dB)": FINAL_METRICS[name]["PSNR"],
+            "SSIM": FINAL_METRICS[name]["SSIM"],
+            "Params (M)": round(params_m, 2),
+            "FLOPs (GMac)": round(flops_gmac, 2),
+            "Inf (ms)": round(inf_ms, 2),
         })
 
-    df   = pd.DataFrame(results)[["model","params (M)","FLOPs","Inf (ms)","PSNR (dB)","SSIM"]]
-    print("\nModel Comparison:\n", df.to_markdown(index=False))
+    # ========================================================
+    # SAVE RESULTS
+    # ========================================================
+    df = pd.DataFrame(results)
+    df.to_csv(RESULTS_DIR / "model_comparison.csv", index=False)
+    df.to_json(RESULTS_DIR / "model_comparison.json", orient="records", indent=2)
+    print("\nFINAL MODEL COMPARISON\n")
+    print(df)
 
-    out_dir = Path("results") / "tables"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    df.to_csv( out_dir/"model_comparison.csv", index=False )
-    df.to_json(out_dir/"model_comparison.json", orient="records", lines=True)
-    print(f"Saved metrics → {out_dir}")
-
-    # ────────────────────────────────────────────────────────────────────────────────
-    # plot PSNR, SSIM, Inf time, Params, FLOPs
-    df["FLOPs_num"] = df["FLOPs"].str.replace(r"[^\d\.]", "", regex=True).astype(float)
+    # ========================================================
+    # PLOTS
+    # ========================================================
     models = df["model"].tolist()
-    x      = np.arange(len(models))
+    x = np.arange(len(models))
 
-    fig, axes = plt.subplots(2, 3, figsize=(18, 10), tight_layout=True)
+    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+    axes = axes.flatten()
 
-    # row 0
-    axes[0,0].bar(x, df["PSNR (dB)"],     color="C0"); axes[0,0].set_title("PSNR (dB)")
-    axes[0,1].bar(x, df["SSIM"],          color="C1"); axes[0,1].set_title("SSIM")
-    axes[0,2].bar(x, df["Inf (ms)"],      color="C2"); axes[0,2].set_title("Inference Time (ms)")
+    axes[0].bar(x, df["PSNR (dB)"]); axes[0].set_title("PSNR (dB)")
+    axes[1].bar(x, df["SSIM"]); axes[1].set_title("SSIM")
+    axes[2].bar(x, df["Inf (ms)"]); axes[2].set_title("Inference Time (ms)")
+    axes[3].bar(x, df["Params (M)"]); axes[3].set_title("Parameters (M)")
+    axes[4].bar(x, df["FLOPs (GMac)"]); axes[4].set_title("FLOPs (×10⁹ MACs)")
+    axes[5].axis("off")
 
-    # row 1
-    axes[1,0].bar(x, df["params (M)"],    color="C3"); axes[1,0].set_title("Parameters (M)")
-    axes[1,1].bar(x, df["FLOPs_num"],     color="C4"); axes[1,1].set_title("FLOPs (×10⁹ MACs)")
-    axes[1,2].axis("off")
-
-    for ax in axes.ravel():
+    for ax in axes:
         ax.set_xticks(x)
         ax.set_xticklabels(models, rotation=45, ha="right")
 
-    axes[0,0].set_ylabel("dB")
-    axes[0,2].set_ylabel("ms")
-    axes[1,0].set_ylabel("Millions")
-    axes[1,1].set_ylabel("Giga MACs")
-
+    plt.tight_layout()
+    plt.savefig(RESULTS_DIR / "model_comparison_plots.png", dpi=300)
     plt.show()
-    fig.savefig(out_dir/"model_comparison_plots.png", dpi=300, bbox_inches="tight")
-    print(f"Saved plot → {out_dir/'model_comparison_plots.png'}")
 
+    print("Saved:")
+    print(" - model_comparison.csv")
+    print(" - model_comparison.json")
+    print(" - model_comparison_plots.png")
+
+# ============================================================
 if __name__ == "__main__":
     main()
