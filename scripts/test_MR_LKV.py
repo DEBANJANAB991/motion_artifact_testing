@@ -30,6 +30,7 @@ MODEL_PATH = Path(CKPT_DIR) / "mr_lkv" / "best_model.pth"
 
 IN_DIR  = Path(ARTIFACT_SINOGRAM_2D_TEST)
 OUT_DIR = Path(PREDICTED_SINOGRAM_2D_TEST)
+OUT_DIR = Path(UNet_Predicted_SINOGRAM_2D_TEST)
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # -------------------------
