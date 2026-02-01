@@ -4,10 +4,10 @@ from pathlib import Path
 import re
 from collections import defaultdict
 
-from config import PREDICTED_SINOGRAM_2D_TEST, MERGED_SINOGRAM_3D_TEST
-
-IN_DIR  = PREDICTED_SINOGRAM_2D_TEST
-OUT_DIR = MERGED_SINOGRAM_3D_TEST
+#from config import PREDICTED_SINOGRAM_2D_TEST_v2, MERGED_SINOGRAM_3D_TEST_v2
+from config import ARTIFACT_SINOGRAM_2D_TEST_v2, MERGED_ARTIFACT_3D_TEST_v2
+IN_DIR  = ARTIFACT_SINOGRAM_2D_TEST_v2
+OUT_DIR = MERGED_ARTIFACT_3D_TEST_v2
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Example filename:
