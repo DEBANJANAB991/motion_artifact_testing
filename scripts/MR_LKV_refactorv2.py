@@ -14,6 +14,31 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class ViewAxisAttention(nn.Module):
+    """
+    Lightweight attention along the view (width) axis.
+    Input:  [B, C, H, W]
+    Output: [B, C, H, W]
+    """
+    def __init__(self, channels, reduction=8):
+        super().__init__()
+        self.pool = nn.AdaptiveAvgPool2d((1, None))  # pool over H
+        self.fc = nn.Sequential(
+            nn.Conv1d(channels, channels // reduction, kernel_size=1),
+            nn.ReLU(inplace=True),
+            nn.Conv1d(channels // reduction, channels, kernel_size=1),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        # pool over detector height
+        y = self.pool(x)          # [B, C, 1, W]
+        y = y.squeeze(2)          # [B, C, W]
+        y = self.fc(y)            # [B, C, W]
+        y = y.unsqueeze(2)        # [B, C, 1, W]
+        return x * y
+
 # -----------------------------
 # LayerNorm helper & norm getter
 # -----------------------------
@@ -119,7 +144,7 @@ class MR_LKV(nn.Module):
         dilations: Sequence[int] = (1,1,1,1),
         depthwise: bool = True,
         norm: str = 'bn',
-        use_decoder: bool = True, #added extra
+        #use_decoder: bool = True, #added extra
         **kwargs,
     ):
         super().__init__()
@@ -147,6 +172,12 @@ class MR_LKV(nn.Module):
         self.freq1, self.attn1 = FEB(Cs[1], norm), CA(Cs[1])
         self.freq2, self.attn2 = FEB(Cs[2], norm), CA(Cs[2])
         self.freq3, self.attn3 = FEB(Cs[3], norm), CA(Cs[3])
+
+        self.view_attn0 = ViewAxisAttention(Cs[0])
+        self.view_attn1 = ViewAxisAttention(Cs[1])
+        self.view_attn2 = ViewAxisAttention(Cs[2])
+        self.view_attn3 = ViewAxisAttention(Cs[3])
+
         # decoder fuses
         self.dec2 = nn.Conv2d(Cs[3]+Cs[2], Cs[2], 1)
         self.dec1 = nn.Conv2d(Cs[2]+Cs[1], Cs[1], 1)
@@ -157,14 +188,15 @@ class MR_LKV(nn.Module):
         H, W = x.shape[-2:]
         # encoder + skips
         x0 = self.patch_embed(x)
-        f0 = self.freq0(x0);  a0 = self.attn0(f0);
-        s0 = self.stage0(a0); e0 = self.down0(s0)
-        f1 = self.freq1(e0);  a1 = self.attn1(f1);
-        s1 = self.stage1(a1); e1 = self.down1(s1)
-        f2 = self.freq2(e1);  a2 = self.attn2(f2);
-        s2 = self.stage2(a2); e2 = self.down2(s2)
-        f3 = self.freq3(e2);  a3 = self.attn3(f3);
-        e3 = self.stage3(a3)
+        #f0 = self.freq0(x0);  a0 = self.attn0(f0);
+        f0 = self.freq0(x0); a0 = self.attn0(f0); v0 = self.view_attn0(a0)
+        s0 = self.stage0(v0); e0 = self.down0(s0)
+        f1 = self.freq1(e0);  a1 = self.attn1(f1); v1= self.view_attn1(a1);
+        s1 = self.stage1(v1); e1 = self.down1(s1)
+        f2 = self.freq2(e1);  a2 = self.attn2(f2); v2= self.view_attn2(a2);
+        s2 = self.stage2(v2); e2 = self.down2(s2)
+        f3 = self.freq3(e2);  a3 = self.attn3(f3); v3= self.view_attn3(a3);
+        e3 = self.stage3(v3)
         # decoder
         d2 = F.interpolate(e3, size=s2.shape[-2:], mode='bilinear', align_corners=False)
         d2 = self.dec2(torch.cat([d2, s2], dim=1))
