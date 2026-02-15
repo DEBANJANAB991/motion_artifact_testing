@@ -34,8 +34,8 @@ FINAL_METRICS = {
     "mr_lkv":     {"PSNR": 39.97, "SSIM": 0.9940},
     "unet":       {"PSNR": 37.11, "SSIM": 0.9815},
     "replknet":   {"PSNR": -12.42, "SSIM": 0.9034},
-    "swinir":     {"PSNR": 38.98, "SSIM": 0.9813},
-    "restormer":  {"PSNR": 11.76, "SSIM": 0.0233},
+    "swinir":     {"PSNR": 40.55, "SSIM": 0.9916},
+    "restormer":  {"PSNR": 11.22, "SSIM": 0.0228},
 }
 
 # ============================================================
