@@ -1,0 +1,9 @@
+[submodule "ExternalRepo/SwinIR"]
+	path = ExternalRepo/SwinIR
+	url = https://github.com/JingyunLiang/SwinIR.git
+[submodule "ExternalRepo/Restormer"]
+	path = ExternalRepo/Restormer
+	url = https://github.com/JingyunLiang/SwinIR.git
+[submodule "ExternalRepo/diffct"]
+	path = ExternalRepo/diffct
+	url = https://github.com/JingyunLiang/SwinIR.git
