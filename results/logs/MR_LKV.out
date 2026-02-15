@@ -1,0 +1,111 @@
+### Starting TaskPrologue of job 1484207 on tg071 at Sat Jan 10 11:53:34 AM CET 2026
+Running on cores 6-7,14-15,22-23,30-31 with governor ondemand
+Sat Jan 10 11:53:34 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.195.03             Driver Version: 570.195.03     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:AF:00.0 Off |                    0 |
+| N/A   30C    P0             25W /  250W |       0MiB /  32768MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+Repo root: /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+SwinIR available: True
+Starting training with model=mr_lkv…
+→ Checkpoints will be saved to: /home/vault/iwi5/iwi5293h/models/mr_lkv
+Using device: cuda
+Dataset: 4300 paired 2D sinograms loaded from /home/woody/iwi5/iwi5293h/clean_sinograms_2d / /home/woody/iwi5/iwi5293h/art_sinograms_2d_v2
+Model parameters: 8,062,427
+Epoch 1/100 — Train: 0.578991, Val: 0.286050 | PSNR: 30.58, SSIM: 0.6243
+Epoch 2/100 — Train: 0.176121, Val: 0.011837 | PSNR: 36.08, SSIM: 0.9859
+Epoch 3/100 — Train: 0.015507, Val: 0.009051 | PSNR: 38.39, SSIM: 0.9891
+Epoch 4/100 — Train: 0.012845, Val: 0.006756 | PSNR: 39.15, SSIM: 0.9919
+Epoch 5/100 — Train: 0.012203, Val: 0.034074 | PSNR: 37.67, SSIM: 0.9563
+Epoch 6/100 — Train: 0.012235, Val: 0.006976 | PSNR: 36.18, SSIM: 0.9924
+Epoch 7/100 — Train: 0.009085, Val: 0.012866 | PSNR: 39.18, SSIM: 0.9840
+Epoch 8/100 — Train: 0.027579, Val: 0.021948 | PSNR: 32.87, SSIM: 0.9733
+Epoch 9/100 — Train: 0.024875, Val: 0.008557 | PSNR: 37.78, SSIM: 0.9898
+Epoch 10/100 — Train: 0.012921, Val: 0.006571 | PSNR: 38.47, SSIM: 0.9923
+Epoch 11/100 — Train: 0.011022, Val: 0.012452 | PSNR: 34.39, SSIM: 0.9857
+Epoch 12/100 — Train: 0.010993, Val: 0.006008 | PSNR: 39.19, SSIM: 0.9929
+Epoch 13/100 — Train: 0.008585, Val: 0.006673 | PSNR: 38.82, SSIM: 0.9921
+Epoch 14/100 — Train: 0.010317, Val: 0.006421 | PSNR: 37.18, SSIM: 0.9928
+Epoch 15/100 — Train: 0.008188, Val: 0.009423 | PSNR: 32.73, SSIM: 0.9901
+Epoch 16/100 — Train: 0.010342, Val: 0.016331 | PSNR: 37.67, SSIM: 0.9797
+Epoch 17/100 — Train: 0.007592, Val: 0.014765 | PSNR: 32.87, SSIM: 0.9831
+Epoch 18/100 — Train: 0.008024, Val: 0.013588 | PSNR: 36.68, SSIM: 0.9836
+Epoch 19/100 — Train: 0.006249, Val: 0.009118 | PSNR: 34.08, SSIM: 0.9902
+Epoch 20/100 — Train: 0.006241, Val: 0.008703 | PSNR: 39.37, SSIM: 0.9894
+Epoch 21/100 — Train: 0.005982, Val: 0.005756 | PSNR: 37.87, SSIM: 0.9936
+Epoch 22/100 — Train: 0.005955, Val: 0.010082 | PSNR: 39.63, SSIM: 0.9875
+Epoch 23/100 — Train: 0.005860, Val: 0.006860 | PSNR: 37.29, SSIM: 0.9923
+Epoch 24/100 — Train: 0.005799, Val: 0.015687 | PSNR: 36.94, SSIM: 0.9808
+Epoch 25/100 — Train: 0.006037, Val: 0.014990 | PSNR: 39.62, SSIM: 0.9811
+Epoch 26/100 — Train: 0.005201, Val: 0.004995 | PSNR: 39.70, SSIM: 0.9941
+Epoch 27/100 — Train: 0.005511, Val: 0.016797 | PSNR: 38.63, SSIM: 0.9790
+Epoch 28/100 — Train: 0.005438, Val: 0.008282 | PSNR: 35.12, SSIM: 0.9910
+Epoch 29/100 — Train: 0.005891, Val: 0.006980 | PSNR: 38.13, SSIM: 0.9920
+Epoch 30/100 — Train: 0.005351, Val: 0.004910 | PSNR: 39.36, SSIM: 0.9943
+Epoch 31/100 — Train: 0.005368, Val: 0.007248 | PSNR: 38.06, SSIM: 0.9916
+Epoch 32/100 — Train: 0.006362, Val: 0.006026 | PSNR: 38.43, SSIM: 0.9932
+Epoch 33/100 — Train: 0.005105, Val: 0.006448 | PSNR: 39.87, SSIM: 0.9922
+Epoch 34/100 — Train: 0.005171, Val: 0.013802 | PSNR: 39.66, SSIM: 0.9826
+Epoch 35/100 — Train: 0.005204, Val: 0.005256 | PSNR: 39.96, SSIM: 0.9937
+Epoch 36/100 — Train: 0.005406, Val: 0.005515 | PSNR: 38.42, SSIM: 0.9938
+Epoch 37/100 — Train: 0.004770, Val: 0.005303 | PSNR: 39.80, SSIM: 0.9937
+Epoch 38/100 — Train: 0.004800, Val: 0.004841 | PSNR: 39.47, SSIM: 0.9944
+Epoch 39/100 — Train: 0.004764, Val: 0.004581 | PSNR: 40.03, SSIM: 0.9945
+Epoch 40/100 — Train: 0.004854, Val: 0.004983 | PSNR: 38.73, SSIM: 0.9944
+Epoch 41/100 — Train: 0.004838, Val: 0.005370 | PSNR: 38.36, SSIM: 0.9940
+Epoch 42/100 — Train: 0.004718, Val: 0.006910 | PSNR: 39.27, SSIM: 0.9918
+Epoch 43/100 — Train: 0.004977, Val: 0.004718 | PSNR: 39.76, SSIM: 0.9945
+Epoch 44/100 — Train: 0.004688, Val: 0.004579 | PSNR: 40.05, SSIM: 0.9945
+Epoch 45/100 — Train: 0.004868, Val: 0.005010 | PSNR: 39.64, SSIM: 0.9942
+Epoch 46/100 — Train: 0.004770, Val: 0.005747 | PSNR: 39.97, SSIM: 0.9931
+Epoch 47/100 — Train: 0.004720, Val: 0.004904 | PSNR: 39.44, SSIM: 0.9943
+Epoch 48/100 — Train: 0.004807, Val: 0.005325 | PSNR: 39.60, SSIM: 0.9938
+Epoch 49/100 — Train: 0.004786, Val: 0.004588 | PSNR: 40.17, SSIM: 0.9945
+Epoch 50/100 — Train: 0.004642, Val: 0.005424 | PSNR: 40.12, SSIM: 0.9935
+Epoch 51/100 — Train: 0.004555, Val: 0.005475 | PSNR: 39.91, SSIM: 0.9935
+Epoch 52/100 — Train: 0.004552, Val: 0.004670 | PSNR: 40.13, SSIM: 0.9945
+Epoch 53/100 — Train: 0.004527, Val: 0.004864 | PSNR: 39.41, SSIM: 0.9944
+Epoch 54/100 — Train: 0.004563, Val: 0.005198 | PSNR: 40.03, SSIM: 0.9939
+Early stopping triggered.
+Saved training curves to /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/plots/mr_lkv/training_curves.png
+Saved sample reconstructions to /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/plots/mr_lkv/reconstructed/sinograms
+Final Test — Loss: 0.005103, PSNR: 39.97, SSIM: 0.9940
+=== JOB_STATISTICS ===
+=== current date     : Sun Jan 11 11:16:39 AM CET 2026
+= Job-ID             : 1484207 on tinygpu
+= Job-Name           : MR_LKV
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : v100
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 23:23:09
+= Total RAM usage    : 20.7 GiB of requested  GiB (%)   
+= Node list          : tg071
+= Subm/Elig/Start/End: 2026-01-10T11:53:04 / 2026-01-10T11:53:04 / 2026-01-10T11:53:30 / 2026-01-11T11:16:39
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc              22.6G   104.9G   209.7G        N/A  48,946      500K   1,000K        N/A    
+    /home/woody           661.7G  1000.0G  1500.0G        N/A     292K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:AF:00.0, 2863863, 99 %, 13 %, 9470 MiB, 84172575 ms

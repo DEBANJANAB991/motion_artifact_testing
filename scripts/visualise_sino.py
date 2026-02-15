@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from scipy.fft import fft, ifft, fftfreq
-from config import MERGED_SINOGRAM_3D_TEST, TEST_ARTIFACT_ROOT
+from config import MERGED_SINOGRAM_3D_TEST_v2, TEST_ARTIFACT_ROOT
 # ---------------------------------------------------------
 # Ramp filter (1D, applied along detector axis)
 # ---------------------------------------------------------
@@ -72,12 +72,12 @@ def save_sinogram_preview(sino_np, save_path, title_prefix="clean"):
 # MAIN
 # ---------------------------------------------------------
 def main():
-    CLEAN_DIR = MERGED_SINOGRAM_3D_TEST
+    CLEAN_DIR = MERGED_SINOGRAM_3D_TEST_v2
     ART_DIR   = TEST_ARTIFACT_ROOT
 
     # Create output folder next to script
     SCRIPT_DIR = Path(__file__).resolve().parent
-    OUT_DIR = SCRIPT_DIR / "sino_preview"
+    OUT_DIR = SCRIPT_DIR / "sino_preview_v2"
     OUT_DIR.mkdir(exist_ok=True)
 
     clean_files = sorted(CLEAN_DIR.glob("*.npy"))[:10]

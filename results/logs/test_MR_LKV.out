@@ -1,0 +1,54 @@
+### Starting TaskPrologue of job 1475575 on tg072 at Mon Dec 29 12:18:01 PM CET 2025
+Running on cores 2-3,10-11,18-19,26-27 with governor ondemand
+Mon Dec 29 12:18:01 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.195.03             Driver Version: 570.195.03     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:3B:00.0 Off |                    0 |
+| N/A   40C    P0             30W /  250W |       0MiB /  32768MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+Loaded MR_LKV from /home/vault/iwi5/iwi5293h/models/mr_lkv/best_model.pth
+Running inference on device: cuda
+Found 15660 sinograms to process
+
+✅ MR_LKV inference completed.
+Predicted sinograms saved to:
+  /home/woody/iwi5/iwi5293h/predicted_sinograms_2d_test_v2
+=== JOB_STATISTICS ===
+=== current date     : Mon Dec 29 12:58:36 PM CET 2025
+= Job-ID             : 1475575 on tinygpu
+= Job-Name           : test_MR_LKV
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : v100
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 00:40:42
+= Total RAM usage    : 20.7 GiB of requested  GiB (%)   
+= Node list          : tg072
+= Subm/Elig/Start/End: 2025-12-29T12:17:53 / 2025-12-29T12:17:53 / 2025-12-29T12:17:54 / 2025-12-29T12:58:36
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/woody           622.6G  1000.0G  1500.0G        N/A     292K   5,000K   7,500K        N/A    
+    /home/hpc              22.3G   104.9G   209.7G        N/A  43,945      500K   1,000K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:3B:00.0, 624701, 97 %, 42 %, 9316 MiB, 74572341 ms
+Tesla V100-PCIE-32GB, 00000000:3B:00.0, 653428, 49 %, 4 %, 1082 MiB, 2424606 ms

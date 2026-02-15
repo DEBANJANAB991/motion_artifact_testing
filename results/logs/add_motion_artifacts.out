@@ -1,0 +1,47 @@
+### Starting TaskPrologue of job 1520929 on tg072 at Fri Jan 30 04:15:38 PM CET 2026
+Running on cores 6-7,14-15,22-23,30-31 with governor ondemand
+Fri Jan 30 16:15:38 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.211.01             Driver Version: 570.211.01     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:AF:00.0 Off |                    0 |
+| N/A   33C    P0             26W /  250W |       0MiB /  32768MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+Processing 29 sinograms from /home/woody/iwi5/iwi5293h/clean_sinograms_test -> /home/woody/iwi5/iwi5293h/art_sinograms_test (Option A cubic-spline motion)
+=== JOB_STATISTICS ===
+=== current date     : Fri Jan 30 04:18:10 PM CET 2026
+= Job-ID             : 1520929 on tinygpu
+= Job-Name           : add_motion_artifacts.py
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : v100
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 12:00:00
+= Elapsed runtime    : 00:02:34
+= Total RAM usage    : 9.2 GiB of requested  GiB (%)   
+= Node list          : tg072
+= Subm/Elig/Start/End: 2026-01-30T16:15:33 / 2026-01-30T16:15:33 / 2026-01-30T16:15:33 / 2026-01-30T16:18:07
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc              21.6G   104.9G   209.7G        N/A  38,307      500K   1,000K        N/A    
+    /home/woody           628.0G  1000.0G  1500.0G        N/A     292K   5,000K   7,500K        N/A    
+    /home/vault           364.2G  1048.6G  2097.2G        N/A     196K     200K     400K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]

@@ -1,0 +1,85 @@
+### Starting TaskPrologue of job 1479935 on tg074 at Tue Jan  6 10:55:20 PM CET 2026
+Running on cores 0-1,8-9,16-17,24-25 with governor ondemand
+Tue Jan  6 22:55:20 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.195.03             Driver Version: 570.195.03     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:18:00.0 Off |                    0 |
+| N/A   32C    P0             26W /  250W |       0MiB /  32768MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+Repo root: /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+SwinIR available: True
+Starting training with model=unet…
+→ Checkpoints will be saved to: /home/vault/iwi5/iwi5293h/models/unet
+Using device: cuda
+Dataset: 4300 paired 2D sinograms loaded from /home/woody/iwi5/iwi5293h/clean_sinograms_2d / /home/woody/iwi5/iwi5293h/art_sinograms_2d_v2
+Model parameters: 31,042,369
+Epoch 1/100 — Train: 0.307006, Val: 0.038515 | PSNR: 33.55, SSIM: 0.9514
+Epoch 2/100 — Train: 0.017714, Val: 0.043583 | PSNR: 34.67, SSIM: 0.9444
+Epoch 3/100 — Train: 0.015279, Val: 0.119633 | PSNR: 34.41, SSIM: 0.8437
+Epoch 4/100 — Train: 0.016440, Val: 0.028033 | PSNR: 36.27, SSIM: 0.9647
+Epoch 5/100 — Train: 0.011553, Val: 0.022948 | PSNR: 38.76, SSIM: 0.9708
+Epoch 6/100 — Train: 0.013457, Val: 0.549069 | PSNR: 31.02, SSIM: 0.2766
+Epoch 7/100 — Train: 0.013566, Val: 0.084866 | PSNR: 37.80, SSIM: 0.8890
+Epoch 8/100 — Train: 0.009124, Val: 0.017120 | PSNR: 35.54, SSIM: 0.9792
+Epoch 9/100 — Train: 0.013207, Val: 0.107195 | PSNR: 27.41, SSIM: 0.8624
+Epoch 10/100 — Train: 0.020693, Val: 0.084482 | PSNR: 26.81, SSIM: 0.8925
+Epoch 11/100 — Train: 0.015595, Val: 0.056081 | PSNR: 32.66, SSIM: 0.9280
+Epoch 12/100 — Train: 0.012087, Val: 0.088133 | PSNR: 28.40, SSIM: 0.8872
+Epoch 13/100 — Train: 0.013896, Val: 0.015648 | PSNR: 23.97, SSIM: 0.9852
+Epoch 14/100 — Train: 0.009906, Val: 0.009788 | PSNR: 38.81, SSIM: 0.9881
+Epoch 15/100 — Train: 0.013936, Val: 0.079522 | PSNR: 36.00, SSIM: 0.8965
+Epoch 16/100 — Train: 0.008753, Val: 0.159205 | PSNR: 30.82, SSIM: 0.7922
+Epoch 17/100 — Train: 0.008680, Val: 0.051961 | PSNR: 32.65, SSIM: 0.9337
+Epoch 18/100 — Train: 0.010839, Val: 0.005530 | PSNR: 36.25, SSIM: 0.9938
+Epoch 19/100 — Train: 0.016668, Val: 0.027740 | PSNR: 30.81, SSIM: 0.9662
+Epoch 20/100 — Train: 0.008434, Val: 0.065919 | PSNR: 27.70, SSIM: 0.9165
+Epoch 21/100 — Train: 0.008488, Val: 0.016194 | PSNR: 37.05, SSIM: 0.9797
+Epoch 22/100 — Train: 0.008800, Val: 0.057248 | PSNR: 21.56, SSIM: 0.9318
+Epoch 23/100 — Train: 0.009810, Val: 0.014390 | PSNR: 35.57, SSIM: 0.9827
+Epoch 24/100 — Train: 0.006259, Val: 0.081992 | PSNR: 36.28, SSIM: 0.8931
+Epoch 25/100 — Train: 0.005602, Val: 0.016174 | PSNR: 27.67, SSIM: 0.9815
+Epoch 26/100 — Train: 0.005783, Val: 0.019325 | PSNR: 33.92, SSIM: 0.9766
+Epoch 27/100 — Train: 0.005849, Val: 0.005566 | PSNR: 36.99, SSIM: 0.9936
+Epoch 28/100 — Train: 0.005786, Val: 0.015000 | PSNR: 37.22, SSIM: 0.9815
+Early stopping triggered.
+Saved training curves to /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/plots/unet/training_curves.png
+Saved sample reconstructions to /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/scripts/results/plots/unet/reconstructed/sinograms
+Final Test — Loss: 0.015001, PSNR: 37.11, SSIM: 0.9815
+=== JOB_STATISTICS ===
+=== current date     : Wed Jan  7 04:33:05 AM CET 2026
+= Job-ID             : 1479935 on tinygpu
+= Job-Name           : UNet
+= Job-Command        : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis/job.sh
+= Initial workdir    : /home/hpc/iwi5/iwi5293h/Debanjana_Master_Thesis
+= Queue/Partition    : v100
+= Slurm account      : iwi5 with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 05:37:46
+= Total RAM usage    : 20.7 GiB of requested  GiB (%)   
+= Node list          : tg074
+= Subm/Elig/Start/End: 2026-01-06T22:55:15 / 2026-01-06T22:55:15 / 2026-01-06T22:55:19 / 2026-01-07T04:33:05
+======================
+=== Quota infos ======
+    Path                 Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/woody           661.7G  1000.0G  1500.0G        N/A     292K   5,000K   7,500K        N/A    
+    /home/hpc              22.9G   104.9G   209.7G        N/A  49,172      500K   1,000K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:18:00.0, 152873, 99 %, 60 %, 31854 MiB, 20253582 ms
